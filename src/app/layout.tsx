@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { MantineProvider } from "@mantine/core";
+import "@mantine/core/styles.css";
+import Header from "@/components/Header/header";
+import { SidebarProvider } from "@/contexts/SiderbarContext";
+import Sidebar from "@/components/Sidebar/sideBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,9 +30,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#FAF9F6]`}
       >
-        {children}
+        <MantineProvider>
+          <SidebarProvider>
+            <Header />
+            <div className="flex w-full">
+              <Sidebar />
+              {children}
+            </div>
+          </SidebarProvider>
+        </MantineProvider>
       </body>
     </html>
   );

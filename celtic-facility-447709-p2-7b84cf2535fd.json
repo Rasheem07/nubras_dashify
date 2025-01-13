@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "celtic-facility-447709-p2",
+  "private_key_id": "7b84cf2535fdd10071f75853aea9b1898d20e7bb",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC/PMzq04wr/8n1\nm/QqdsjQdLup3nCdDAPkT67XyjS+uS2yEvYlMBdJCD8gsoEWMx2jr0/YdJ3ycVYX\nkVIssbyjA0t8j41y1gvMqY0XmrJoyFMes6sw3OxRJJacs+cljHP5VymiFPKeO2JX\nY0+nquHKllr82OoKurstNSkzhT9ZrzngIFC9r2zC5Kv2NEuXk8nHaOaGNmZh6C2H\nqdM96Gc1puKTp8npgYAluXUgYzFYnmxt/WY7h+U6Hu0EzXBpQmuDW4EQO7eNaw+w\nfrhE7Wr2hRyq+WwD+MsyDU7ZPlOhBe6MCZlLjvVE7IC3yIUues2jgG9kZfg34kLd\nsuJ06W+HAgMBAAECggEACQi+RXmo7Ysv50JuznK+Gdrp4qR3fXPL20VIZTlQNJJa\n7kanCiqzbufM06abIolXpRvrEbawn3trLcHXt/TNjIXjUwcVD4+9DvYTjEHqm7ia\n9KBYPf6xy0OHOe/lw4hXEjhj5xxGOeNkSeyPHsSb1g40Ti2RIOChZwlT4PMygvIH\nPy/ED4tW/sZBzINwEU4jfWu+kAaMBaF+3e9UCM7o1mIlrvdQrHgO3FENreZrIoJk\n3uoHpBEa/o7ITjiWbHtoCLrgDDQp8YQSxelkh8CoNUzDZpYN5Xe67rekYlpjWErf\nJSwO8ulFauqRZLnl/c8WkjbH5S+2MD7Be31hP+mPQQKBgQDr34g4xJ8Bfz2YcquE\nuv0fxqUDieyR4twZUpC/OeTjDMlVfGGc7ZxgCzzt4Oqzmp14S6dH5R0TJtQFJorH\nE4G1cLi5vO04eWp1ZrUIl+pdT2TtpQhIL/uZmPEZmRD2HNN+izYh9DGcALuMgBo+\nJCICzjmOr4KuAapA7G/A+FmiXQKBgQDPjjyJzscdCFhPeynNvvgrXMbdYbyYna5v\nipSdmJuGXjM1rlgQ41vre7vd/aS53KMSdHQBY5XlSWN5pUwzK0P53Xmzjn5HCufF\nyHN9TqZyXpx8zZgg5A+uv+z8MmMjFTZz9/YvUrdJC020HEmBRsjiihXAoGn04cyz\nsyzo0lMDMwKBgQC1xZDL9rJ2y+Di/9OwOQ3ilAoMvRijoIlvtlI4G9yJIQxzJaRv\n9CkjVuXAiCk2+ftKfjrOzADpBm4z/ezK1/yIn/KrqK3DbMYe7WSr167T8+Bax2in\ngNrLFrMOwAfzMmnGRnAUIISurV3bO8l9hAj10olGrXjusffLiqngs0MYPQKBgC6d\ndG1C+qdDm4nmUII8FMKwaJ2J+PCR4X59slke0DdCat/wkyjf12Iw/QWjlN6Fdj6L\n1w4EzsKbU/MbM9z+J5szqcSxCR1tjpZ2KbIH+wwOwbip+DPS5M7Lni8aJffYKM2s\n8Ca6vh1yo3YDMGMPgciXWMFVhdaQ7AekAz8bFbfPAoGABgo9LeK42u2JPzdZzzTj\nQMn2xUXxKJzSJFRaqG0pYhM2afbIenVo+Mr77gpqzGepUVkyf1AS8DEydct3hjz8\nyTUFtAGhx4o45uedXN23W3JNxKzaygV53dk/CEIFb5MhS9QCfwlDCoif+WT3dYsX\nojvAQT8V4gSCg87KFezsu6U=\n-----END PRIVATE KEY-----\n",
+  "client_email": "nubras-1232@celtic-facility-447709-p2.iam.gserviceaccount.com",
+  "client_id": "115939201105343448580",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/nubras-1232%40celtic-facility-447709-p2.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
