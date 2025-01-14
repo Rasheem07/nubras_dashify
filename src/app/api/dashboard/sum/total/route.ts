@@ -1,61 +1,90 @@
-import { PrismaClient } from '@prisma/client';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import client from "@/database";
 
-const prisma = new PrismaClient();
-
-export async function GET() {
+export async function POST(req: Request) {
   try {
-    // First query to get total sums
-    const totalSumsResult = await prisma.$queryRaw<{
-      total_sum: bigint | null;
-      tax_sum: bigint | null;
-      excl_tax_sum: bigint | null;
-    }[]>`
+    // Parse the request body
+    const { type, month, quarter, half, startDate, endDate, year } = await req.json();
+
+    // Validate the input
+    if (!type || !year) {
+      return new Response("Missing required fields!", { status: 400 });
+    }
+
+    // Get the input year and the previous year
+    const inputYear = year;
+    const previousYear = inputYear - 1;
+
+    let query = `
       SELECT
+        EXTRACT(YEAR FROM "Sale Date") AS year,
         SUM("TOTAL AMOUNT") AS total_sum,
         SUM("TAX AMOUNT") AS tax_sum,
-        SUM("AMOUNT EXCLUDING TAX") AS excl_tax_sum
-      FROM Nubras_database;
+        SUM("VISA PAYMENT") as visa_amount,
+        SUM("BANK TRANSFER PAYMENT") as bank_transfer_amount,
+        SUM("CASH PAYMENT") as cash_payment,
+        SUM("ADVANCE AMOUNT PAYMENT") as advance_payment,
+        SUM("AMOUNT EXCLUDING TAX") as excl_tax_sum,
+        SUM("BALANCE AMOUNT") as balance
+      FROM Nubras_database
+      WHERE EXTRACT(YEAR FROM "Sale Date") IN ($1, $2)
     `;
 
-    // Second query to get the monthly totals and calculate the average
-    const monthlyAvgResult = await prisma.$queryRaw<{
-      avg_monthly_sales: bigint | null;
-    }[]>`
-      SELECT
-        AVG(monthly_sales) AS avg_monthly_sales
-      FROM (
-        SELECT
-          SUM("TOTAL AMOUNT") AS monthly_sales
-        FROM Nubras_database
-        GROUP BY DATE_TRUNC('month', "Sale Date")
-      ) AS monthly_totals;
-    `;
+    // eslint-disable-next-line prefer-const
+    let queryParams: any[] = [inputYear, previousYear];
 
-    // Extract and safely handle BigInt values for total sums
-    const totalAmountSum = totalSumsResult[0]?.total_sum ? totalSumsResult[0].total_sum.toString() : '0';
-    const taxAmountSum = totalSumsResult[0]?.tax_sum ? totalSumsResult[0].tax_sum.toString() : '0';
-    const amountExcludingTaxSum = totalSumsResult[0]?.excl_tax_sum ? totalSumsResult[0].excl_tax_sum.toString() : '0';
+    // Define quarter and half mappings
+    const quarterMapping: { [key: string]: string } = {
+      q1: "1",
+      q2: "2",
+      q3: "3",
+      q4: "4",
+    };
 
-    // Safely handle BigInt value for monthly average
-    const avgMonthlySales = monthlyAvgResult[0]?.avg_monthly_sales ? parseFloat(monthlyAvgResult[0].avg_monthly_sales.toString()) : 0;
+    const halfMapping: { [key: string]: string[] } = {
+      first: ["1", "2", "3", "4", "5", "6"],
+      second: ["7", "8", "9", "10", "11", "12"],
+    };
 
-    // Return the response
-    return new Response(
-      JSON.stringify({
-        totalAmountSum,
-        taxAmountSum,
-        amountExcludingTaxSum,
-        avgMonthlySales,
-      }),
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
+    // Add filters based on the 'type' parameter and other inputs
+    if (type === "month") {
+      query += ` AND EXTRACT(MONTH FROM "Sale Date") = $3`;
+      queryParams.push(month);
+    } else if (type === "quarter") {
+      if (!quarter || !quarterMapping[quarter]) {
+        return new Response("Invalid quarter type!", { status: 400 });
       }
-    );
+      query += ` AND EXTRACT(QUARTER FROM "Sale Date") = $3`;
+      queryParams.push(quarterMapping[quarter]);
+    } else if (type === "half") {
+      if (!half || !halfMapping[half]) {
+        return new Response("Invalid half type!", { status: 400 });
+      }
+      query += ` AND EXTRACT(MONTH FROM "Sale Date") IN (${halfMapping[half]
+        .map((month) => `'${month}'`)
+        .join(", ")})`;
+    } else if (type === "custom" && startDate && endDate) {
+      query += ` AND "Sale Date" BETWEEN TO_DATE($3, 'MM-DD') AND TO_DATE($4, 'MM-DD')`;
+      queryParams.push(startDate, endDate);
+    }
+
+    query += ` GROUP BY EXTRACT(YEAR FROM "Sale Date") ORDER BY year DESC`;
+
+    const pg = await client.connect();
+    // Execute the query
+    const result = await pg.query(query, queryParams);
+
+    await pg.release();
+    return new Response(JSON.stringify(result.rows), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     console.error("Error calculating aggregates:", error);
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+      status: 500,
+    });
   } finally {
-    await prisma.$disconnect();
+    // Release connection back to the pool (if necessary)
   }
 }
