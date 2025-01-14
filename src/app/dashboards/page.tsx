@@ -23,6 +23,9 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  LineChart,
+  Legend,
+  Line,
 } from "recharts";
 import {
   Select,
@@ -57,9 +60,12 @@ export default function Dashboard() {
   const [chartData, setChartData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
   const [locationData, setLocationData] = useState([]);
+  const [productsData, setproductsData] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(
     "NUBRAS GENTS KANDORA SECTION"
   ); // Category selection
+  const [selectedCategoryForProducts, SetselectedCategoryForProducts] =
+    useState("NUBRAS GENTS KANDORA SECTION"); // Category selection
   const [selectedLocation, setSelectedLocation] = useState("ABU DHABI"); // Location selection
   const [type, setType] = useState("");
   const [year, setYear] = useState("");
@@ -176,6 +182,48 @@ export default function Dashboard() {
     quarter,
     half,
     selectedCategory,
+  ]);
+
+  // Fetch category data based on selected period and category
+  useEffect(() => {
+    const fetchCategoryProductsData = async () => {
+      if (
+        (selectedPeriod === "custom" && (!startDate || !endDate)) ||
+        (selectedPeriod !== "custom" && !month && !quarter && !half)
+      ) {
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/dashboard/sales/products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: selectedPeriod,
+            month,
+            quarter,
+            half,
+            startDate,
+            endDate,
+            category: selectedCategoryForProducts,
+          }),
+        });
+        const result = await response.json();
+        setproductsData(result);
+      } catch (error) {
+        console.error("Error fetching category data:", error);
+      }
+    };
+
+    fetchCategoryProductsData();
+  }, [
+    startDate,
+    endDate,
+    selectedPeriod,
+    month,
+    quarter,
+    half,
+    selectedCategoryForProducts,
   ]);
 
   // Fetch location data based on selected period and location
@@ -427,12 +475,20 @@ export default function Dashboard() {
           </form>
           <div className="mt-4 px-4">
             {result && result.length > 0 ? (
-              <FinancialCard currentData={result[0]} icon={ShoppingCart} previousData={result[1]} />
+              <FinancialCard
+                currentData={result[0]}
+                icon={ShoppingCart}
+                previousData={result[1]}
+              />
             ) : (
               <div className="flex flex-col items-start w-full mt-5">
-                 <FormInput />
-                 <h1 className="text-2xl font-semibold">Please fill the form for data.</h1>
-                 <p className="text-base font-sans text-gray-400">Select a date for your Data.</p>
+                <FormInput />
+                <h1 className="text-2xl font-semibold">
+                  Please fill the form for data.
+                </h1>
+                <p className="text-base font-sans text-gray-400">
+                  Select a date for your Data.
+                </p>
               </div>
             )}
           </div>
@@ -598,6 +654,50 @@ export default function Dashboard() {
                     <Tooltip />
                     <Bar dataKey="total_sales" fill="#2196f3" />
                     <Bar dataKey="total_quantity" fill="#343244" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <div className="flex items-center justify-between w-full pr-6">
+                <CardHeader>
+                  <CardTitle>Sales by Products for category</CardTitle>
+                  <CardDescription>
+                    Sales data grouped by Products according to category
+                  </CardDescription>
+                </CardHeader>
+                <Select
+                  value={selectedCategoryForProducts}
+                  onValueChange={(value) =>
+                    SetselectedCategoryForProducts(value)
+                  }
+                >
+                  <SelectTrigger className="h-full bg-white max-w-max">
+                    {selectedCategoryForProducts || "Select Category"}
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NUBRAS GENTS KANDORA SECTION">
+                      NUBRAS GENTS KANDORA SECTION
+                    </SelectItem>
+                    <SelectItem value="NUBRAS JUNIOR KID'S SECTION">
+                      NUBRAS JUNIOR KID&apos;S SECTION
+                    </SelectItem>
+                    <SelectItem value="NUBRAS GENTS ITEM'S SECTION">
+                      NUBRAS GENTS ITEM&apos;S SECTION
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={productsData} margin={{ left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="product" tick={false}/>
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="total_sales" fill="#1E90FF" />
+                    <Bar dataKey="total_quantity" fill="#32CD32" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>

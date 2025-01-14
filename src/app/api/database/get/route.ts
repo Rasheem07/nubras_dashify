@@ -14,11 +14,17 @@ export async function GET(req: NextRequest) {
 
   try {
     // Query the total row count
-    const totalCountResult = await pg.query(`SELECT COUNT(*) FROM ${name}`);
+    const totalCountResult = await pg.query(
+      `SELECT COUNT(*) FROM ${name} WHERE "SALE ORDER DATE" BETWEEN $1 AND $2`,
+      ['2024-12-01', '2024-12-31']
+    );
     const totalCount = parseInt(totalCountResult.rows[0].count);
 
     // Query the data for the current page
-    const result = await pg.query(`SELECT * FROM ${name} ORDER BY id LIMIT $1 OFFSET $2`, [pageSize, offset]);
+    const result = await pg.query(
+      `SELECT * FROM ${name} WHERE "SALE ORDER DATE" BETWEEN $1 AND $2 ORDER BY id LIMIT $3 OFFSET $4`,
+      ['2024-12-01', '2024-12-31', pageSize, offset]
+    );
 
     return NextResponse.json({
       data: result.rows,

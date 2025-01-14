@@ -1,14 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+// import TableFilter from "@/components/Header/tableFilterHeader";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useTable, usePagination } from "react-table";
 
 // pages/index.js
-export default function Home({
-  params,
-}: {
-  params: any;
-}) {
+export default function Home({ params }: { params: any }) {
   const { name } = React.use(params) as { name: string };
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,22 +14,25 @@ export default function Home({
   const pageSize = 100;
 
   // Fetch data from the API
-  const fetchData = useCallback(async (page: number) => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/database/get?page=${page}&pageSize=${pageSize}&name=${name}`
-      );
-      const result = await response.json();
+  const fetchData = useCallback(
+    async (page: number) => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `/api/database/get?page=${page}&pageSize=${pageSize}&name=${name}`
+        );
+        const result = await response.json();
 
-      setData(result.data); // Use the data array
-      setPageCount(Math.ceil(result.totalCount / pageSize)); // Calculate pageCount using totalCount
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [name]);
+        setData(result.data); // Use the data array
+        setPageCount(Math.ceil(result.totalCount / pageSize)); // Calculate pageCount using totalCount
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [name]
+  );
 
   // Initial data fetch and when currentPage changes
   useEffect(() => {
@@ -80,8 +80,8 @@ export default function Home({
     <div className="p-6 max-h-[calc(100vh-56px)] overflow-y-scroll w-full">
       <div className="space-y-4">
         {/* Pagination Controls */}
-        <div className="mt-4 flex justify-between items-center text-sm">
-          <h1 className="text-2xl font-semibold mb-2">Table for {name}</h1>
+        <div className="mt-4 flex flex-col md:flex-row justify-between md:items-center text-sm">
+          <h1 className="text-2xl font-semibold mb-4">Table for December 2024</h1>
           <div className="space-x-4">
             <button
               onClick={handlePrevious}
@@ -102,7 +102,7 @@ export default function Home({
             </button>
           </div>
         </div>
-        
+        {/* <TableFilter setData={setData}/> */}
         {/* Table Wrapper */}
         <div className="overflow-x-auto max-w-[95vw]">
           <table
@@ -173,11 +173,31 @@ export default function Home({
                           key={cell.column.id}
                           className="px-6 py-3 text-sm text-gray-700 text-center text-nowrap"
                         >
-                          {cell.value ? (
-                            cell.render("Cell")
-                          ) : (
-                            <span className="text-gray-400">N/A</span>
-                          )}
+                          {(() => {
+                            const value = cell.value;
+                            if (!value) {
+                              return <span className="text-gray-400">N/A</span>;
+                            }
+                            // Check if the column is for month and year
+                            if (
+                              cell.column.id.toLowerCase().includes("month") ||
+                              cell.column.id.toLowerCase().includes("year")
+                            ) {
+                              const date = new Date(value);
+                              if (!isNaN(date.getTime())) {
+                                return date.toLocaleDateString("default", {
+                                  year: "numeric",
+                                  month: "long",
+                                }); // Format as "Month Year" (e.g., "January 2024")
+                              }
+                            }
+                            // Check if the value is a valid date
+                            const date = new Date(value);
+                            if (!isNaN(date.getTime())) {
+                              return date.toLocaleDateString(); // Format as a local date string
+                            }
+                            return cell.render("Cell"); // Render other values as is
+                          })()}
                         </td>
                       ))}
                     </tr>

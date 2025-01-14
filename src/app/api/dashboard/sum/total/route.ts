@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
     let query = `
       SELECT
-        EXTRACT(YEAR FROM "Sale Date") AS year,
+        EXTRACT(YEAR FROM "SALE ORDER DATE") AS year,
         SUM("TOTAL AMOUNT") AS total_sum,
         SUM("TAX AMOUNT") AS tax_sum,
         SUM("VISA PAYMENT") as visa_amount,
@@ -26,8 +26,8 @@ export async function POST(req: Request) {
         SUM("ADVANCE AMOUNT PAYMENT") as advance_payment,
         SUM("AMOUNT EXCLUDING TAX") as excl_tax_sum,
         SUM("BALANCE AMOUNT") as balance
-      FROM Nubras_database
-      WHERE EXTRACT(YEAR FROM "Sale Date") IN ($1, $2)
+      FROM Nubras_database_final1
+      WHERE EXTRACT(YEAR FROM "SALE ORDER DATE") IN ($1, $2)
     `;
 
     // eslint-disable-next-line prefer-const
@@ -48,31 +48,31 @@ export async function POST(req: Request) {
 
     // Add filters based on the 'type' parameter and other inputs
     if (type === "month") {
-      query += ` AND EXTRACT(MONTH FROM "Sale Date") = $3`;
+      query += ` AND EXTRACT(MONTH FROM "SALE ORDER DATE") = $3`;
       queryParams.push(month);
     } else if (type === "quarter") {
       if (!quarter || !quarterMapping[quarter]) {
         return new Response("Invalid quarter type!", { status: 400 });
       }
-      query += ` AND EXTRACT(QUARTER FROM "Sale Date") = $3`;
+      query += ` AND EXTRACT(QUARTER FROM "SALE ORDER DATE") = $3`;
       queryParams.push(quarterMapping[quarter]);
     } else if (type === "half") {
       if (!half || !halfMapping[half]) {
         return new Response("Invalid half type!", { status: 400 });
       }
-      query += ` AND EXTRACT(MONTH FROM "Sale Date") IN (${halfMapping[half]
+      query += ` AND EXTRACT(MONTH FROM "SALE ORDER DATE") IN (${halfMapping[half]
         .map((month) => `'${month}'`)
         .join(", ")})`;
     } else if (type === "custom" && startDate && endDate) {
       // Ensure the dates are in the correct format for PostgreSQL ('YYYY-MM-DD')
-      const formattedStartDate = convertToDateFormat(startDate);
-      const formattedEndDate = convertToDateFormat(endDate);
+      const formattedStartDate = formatDateForPostgreSQL(startDate);
+      const formattedEndDate = formatDateForPostgreSQL(endDate);
 
-      query += ` AND "Sale Date" BETWEEN TO_DATE($3, 'YYYY-MM-DD') AND TO_DATE($4, 'YYYY-MM-DD')`;
+      query += ` AND "SALE ORDER DATE" BETWEEN TO_DATE($3, 'YYYY-MM-DD') AND TO_DATE($4, 'YYYY-MM-DD')`;
       queryParams.push(formattedStartDate, formattedEndDate);
     }
 
-    query += ` GROUP BY EXTRACT(YEAR FROM "Sale Date") ORDER BY year DESC`;
+    query += ` GROUP BY EXTRACT(YEAR FROM "SALE ORDER DATE") ORDER BY year DESC`;
 
     const pg = await client.connect();
     // Execute the query
@@ -94,8 +94,9 @@ export async function POST(req: Request) {
 }
 
 // Helper function to format date as 'YYYY-MM-DD'
-function convertToDateFormat(date: Date | string): string | null {
-  const formatted = new Date(date).toLocaleDateString();
-  const newDate = formatted.split("/");
-  return `${newDate[2]}-${newDate[0]}-${newDate[1]}`;
+function formatDateForPostgreSQL(date: string): string {
+  const dateParts = date.split("-");
+  // Assuming the incoming date is in MM-DD format, we'll prepend the current year
+  const currentYear = new Date().getFullYear();
+  return `${currentYear}-${dateParts[0]}-${dateParts[1]}`;
 }
