@@ -51,7 +51,7 @@ const FinancialCard: React.FC<CardProps> = ({ currentData, previousData, icon: I
   ];
 
   return (
-    <div className="min-w-full mx-auto py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+    <div className="min-w-full mx-auto py-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {fields.map(({ field, label }) => {
         const currentValue = currentData[field];
         if (currentValue === undefined) return null; // Skip if currentData[field] is undefined
@@ -65,54 +65,67 @@ const FinancialCard: React.FC<CardProps> = ({ currentData, previousData, icon: I
         let FieldIcon: LucideIcon;
         switch (field) {
           case "total_sum":
-            FieldIcon = DollarSign;
+            FieldIcon = DollarSign; // Total Sales
             break;
           case "tax_sum":
-            FieldIcon = BarChart;
+            FieldIcon = BarChart; // Total Tax Amount
             break;
           case "visa_amount":
-            FieldIcon = CreditCard;
+            FieldIcon = CreditCard; // Total Visa Amount
             break;
           case "bank_transfer_amount":
-            FieldIcon = Banknote;
+            FieldIcon = Banknote; // Total Bank Transfer Amount
+            break;
+          case "cash_payment":
+            FieldIcon = CreditCard; // Total Cash Payment (Can use Credit Card for payments)
+            break;
+          case "advance_payment":
+            FieldIcon = CreditCard; // Total Advance Amount (CreditCard can be used as an icon)
+            break;
+          case "excl_tax_sum":
+            FieldIcon = BarChart; // Total Amount Excluding Tax (BarChart for financial analysis)
+            break;
+          case "balance":
+            FieldIcon = Banknote; // Total Balance Amount (Banknote for balance)
             break;
           default:
-            FieldIcon = DollarSign; // Default icon
+            FieldIcon = DollarSign; // Default icon (DollarSign as fallback)
             break;
         }
+        
 
         return (
           <ShadcnCard
             key={field}
-            className="bg-white shadow-sm rounded-lg hover:shadow-md transition-shadow"
+            className="bg-white shadow-md rounded-lg hover:shadow-lg transition-shadow ease-in-out duration-300 transform hover:scale-100"
           >
-            <CardHeader className="flex flex-col items-center py-4">
-              <FieldIcon className="h-8 w-8 text-teal-600" />
+            <CardHeader className="flex flex-col items-center py-2">
+              <FieldIcon className="h-8 w-8 text-teal-600 mb-2" />
               <div className="text-center mt-2">
                 <CardTitle className="text-lg font-medium text-gray-800">{label}</CardTitle>
-                <CardDescription className="text-sm text-gray-600">
+                <CardDescription className="text-xs text-gray-500">
                   {prevYearValue ? `${previousData?.year} Comparison` : "No Data for Previous Year"}
                 </CardDescription>
               </div>
             </CardHeader>
-            <CardContent className="flex flex-col items-center text-2xl font-semibold text-teal-800">
-              <p>${parseFloat(currentValue).toLocaleString()}</p>
+            <CardContent className="flex flex-col items-center text-xl font-semibold text-teal-800 space-y-1">
+              <p>AED {parseFloat(currentValue).toLocaleString()}</p>
               {prevYearValue && (
-                <p className="text-sm text-gray-500 mt-2">
-                  Previous Year: ${parseFloat(prevYearValue).toLocaleString()}
+                <p className="text-sm text-gray-500 mt-1">
+                  Previous Year: AED {parseFloat(prevYearValue).toLocaleString()}
                 </p>
               )}
               {prevYearValue ? (
                 <p
-                  className={`mt-2 text-sm ${
-                    Number(diff) > 0 ? "text-green-500" : "text-red-500"
+                  className={`mt-1 text-sm font-medium ${
+                    Number(diff) > 0 ? "text-green-600" : "text-red-600"
                   }`}
                 >
                   {Number(diff) > 0 ? `+${diff}%` : `${diff}%`} compared to{" "}
                   {previousData!.year}
                 </p>
               ) : (
-                <p className="mt-2 text-sm text-gray-500">Data not available for previous year</p>
+                <p className="mt-1 text-sm text-gray-500">Data not available for previous year</p>
               )}
             </CardContent>
           </ShadcnCard>

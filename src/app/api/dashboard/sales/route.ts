@@ -5,6 +5,7 @@ import client from "@/database";
 export async function POST(req: NextRequest) {
   const { type, month, quarter, half, startDate, endDate } = await req.json();
 
+  
   if (!type) {
     return new NextResponse("Missing required fields!", { status: 404 });
   }
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
     query += ` WHERE EXTRACT(YEAR FROM "Sale Date") IS NOT NULL`; // Ensure there's a year
   } else if (type === "custom" && startDate && endDate) {
     query += ` WHERE "Sale Date" BETWEEN TO_DATE($1, 'MM-DD') AND TO_DATE($2, 'MM-DD')`;
-    queryParams = [startDate, endDate];
+    queryParams = [convertToDateFormat(startDate), convertToDateFormat(endDate)];
   } else {
     return new NextResponse("Invalid period type!", { status: 400 });
   }
@@ -61,4 +62,10 @@ export async function POST(req: NextRequest) {
     console.error("Error executing query:", error);
     return new NextResponse("Error executing query", { status: 500 });
   }
+}
+
+function convertToDateFormat(date: Date | string): string | null {
+  const formatted = new Date(date).toLocaleDateString();
+  const newDate = formatted.split("/");
+  return `${newDate[2]}-${newDate[0]}-${newDate[1]}`;
 }

@@ -280,7 +280,7 @@ export default function Dashboard() {
 
       {tab == "general" && (
         <>
-          <form className="space-y-4 m-5 max-w-[50vw] mx-auto mb-4" onSubmit={handleSubmit}>
+          <form className=" m-5 flex items-end gap-4 " onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="year"
@@ -420,7 +420,7 @@ export default function Dashboard() {
 
             <button
               type="submit"
-              className="w-full bg-teal-600 text-white py-2 px-4 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full max-w-max bg-teal-600 text-white py-2 px-6 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               submit
             </button>
@@ -429,7 +429,7 @@ export default function Dashboard() {
             {result && result.length > 0 ? (
               <FinancialCard currentData={result[0]} icon={ShoppingCart} previousData={result[1]} />
             ) : (
-              <div className="flex flex-col items-center w-full">
+              <div className="flex flex-col items-start w-full mt-5">
                  <FormInput />
                  <h1 className="text-2xl font-semibold">Please fill the form for data.</h1>
                  <p className="text-base font-sans text-gray-400">Select a date for your Data.</p>

@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     query += ` AND EXTRACT(YEAR FROM "Sale Date") IS NOT NULL`; // Ensure there's a year
   } else if (type === "custom" && startDate && endDate) {
     query += ` AND "Sale Date" BETWEEN TO_DATE($2, 'MM-DD') AND TO_DATE($3, 'MM-DD')`;
-    queryParams.push(startDate, endDate);
+    queryParams.push(convertToDateFormat(startDate) , convertToDateFormat(endDate));
   } else {
     return new NextResponse("Invalid period type!", { status: 400 });
   }
@@ -61,4 +61,10 @@ export async function POST(req: NextRequest) {
     console.error("Error executing query:", error);
     return new NextResponse("Error executing query", { status: 500 });
   }
+}
+
+function convertToDateFormat(date: Date | string): string | null {
+  const formatted = new Date(date).toLocaleDateString();
+  const newDate = formatted.split("/");
+  return `${newDate[2]}-${newDate[0]}-${newDate[1]}`;
 }

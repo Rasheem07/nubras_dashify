@@ -64,8 +64,12 @@ export async function POST(req: Request) {
         .map((month) => `'${month}'`)
         .join(", ")})`;
     } else if (type === "custom" && startDate && endDate) {
-      query += ` AND "Sale Date" BETWEEN TO_DATE($3, 'MM-DD') AND TO_DATE($4, 'MM-DD')`;
-      queryParams.push(startDate, endDate);
+      // Ensure the dates are in the correct format for PostgreSQL ('YYYY-MM-DD')
+      const formattedStartDate = convertToDateFormat(startDate);
+      const formattedEndDate = convertToDateFormat(endDate);
+
+      query += ` AND "Sale Date" BETWEEN TO_DATE($3, 'YYYY-MM-DD') AND TO_DATE($4, 'YYYY-MM-DD')`;
+      queryParams.push(formattedStartDate, formattedEndDate);
     }
 
     query += ` GROUP BY EXTRACT(YEAR FROM "Sale Date") ORDER BY year DESC`;
@@ -87,4 +91,11 @@ export async function POST(req: Request) {
   } finally {
     // Release connection back to the pool (if necessary)
   }
+}
+
+// Helper function to format date as 'YYYY-MM-DD'
+function convertToDateFormat(date: Date | string): string | null {
+  const formatted = new Date(date).toLocaleDateString();
+  const newDate = formatted.split("/");
+  return `${newDate[2]}-${newDate[0]}-${newDate[1]}`;
 }

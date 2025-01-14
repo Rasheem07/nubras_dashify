@@ -4,7 +4,7 @@ import React from "react";
 import { useSidebar } from "@/contexts/SiderbarContext";
 import Logo from "../Icons/Logo";
 import SideBarNavLink from "./sideBarNavLink";
-import { Bell, Book, Database, Home, LayoutDashboard } from "lucide-react";
+import { Bell, Book, Database, LayoutDashboard } from "lucide-react";
 import { UserButton } from "../userButton/userButton";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,6 @@ const Sidebar: React.FC = () => {
             <Logo />
 
             <div className="flex flex-col gap-y-2">
-              <SideBarNavLink Icon={Home} text="Home" isActive={path == "/"} />
               <SideBarNavLink Icon={Database} text="Databases" isActive={path.startsWith("/databases")} />
               <SideBarNavLink Icon={LayoutDashboard} text="Dashboards" isActive={path.startsWith("/dashboards")}/>
               <SideBarNavLink Icon={Book} text="Collections" isActive={path == "/collections"} />
