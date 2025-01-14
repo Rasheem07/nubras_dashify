@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import client from "@/database";
 
 export async function POST(req: NextRequest) {
-  const { type, month, quarter, half, startDate, endDate, location} = await req.json();
+  const { type, month, quarter, half, startDate, endDate, location } = await req.json();
 
-  if (!type) {
-    return new NextResponse("Missing required fields!", { status: 404 });
+  if (!type || !location) {
+    return new NextResponse("Missing required fields!", { status: 400 });
   }
 
   const pg = await client.connect();
@@ -19,8 +19,9 @@ export async function POST(req: NextRequest) {
     WHERE "CUSTOMER LOCATION" = $1
   `;
 
+  // Query parameters
   // eslint-disable-next-line prefer-const
-  let queryParams: any[] = [ location ]; // Adjust category as needed
+  let queryParams: any[] = [location];
 
   if (type === "single") {
     const [m, d] = startDate.split("-");
@@ -42,10 +43,15 @@ export async function POST(req: NextRequest) {
     };
     query += ` AND EXTRACT(MONTH FROM "SALE ORDER DATE") IN (${halfMapping[half].map((month) => `'${month}'`).join(", ")})`;
   } else if (type === "year") {
-    query += ` AND EXTRACT(YEAR FROM "SALE ORDER DATE") IS NOT NULL`; // Ensure there's a year
+    query += ` AND EXTRACT(YEAR FROM "SALE ORDER DATE") IS NOT NULL`;
   } else if (type === "custom" && startDate && endDate) {
-    query += ` AND "SALE ORDER DATE" BETWEEN TO_DATE($2, 'MM-DD') AND TO_DATE($3, 'MM-DD')`;
-    queryParams.push(convertToDateFormat(startDate), convertToDateFormat(endDate));
+    // Fix the date format to match the PostgreSQL date format
+    const formattedStartDate = convertToDateFormat(startDate);
+    const formattedEndDate = convertToDateFormat(endDate);
+
+    // Adjust query to use the proper date format
+    query += ` AND "SALE ORDER DATE" BETWEEN TO_DATE($2, 'YYYY-MM-DD') AND TO_DATE($3, 'YYYY-MM-DD')`;
+    queryParams.push(formattedStartDate, formattedEndDate);
   } else {
     return new NextResponse("Invalid period type!", { status: 400 });
   }
@@ -63,8 +69,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-function convertToDateFormat(date: Date | string): string | null {
-  const formatted = new Date(date).toLocaleDateString();
-  const newDate = formatted.split("/");
-  return `${newDate[2]}-${newDate[0]}-${newDate[1]}`;
+function convertToDateFormat(date: string): string {
+  const [year, month, day] = date.split("-");
+  return `${year}-${month}-${day}`; // Ensure it's in 'YYYY-MM-DD' format
 }

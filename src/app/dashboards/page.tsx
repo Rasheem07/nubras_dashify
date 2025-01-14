@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, Dispatch, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Banknote,
@@ -13,6 +13,7 @@ import {
   Info,
   TrendingDown,
   FormInput,
+  Download,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -26,6 +27,7 @@ import {
   LineChart,
   Legend,
   Line,
+  ReferenceLine,
 } from "recharts";
 import {
   Select,
@@ -42,9 +44,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import FinancialCard from "./_components/NumberCard";
+import SalesTable from "./_components/salesTable";
+import { jsPDF } from "jspdf";
 
 export default function Dashboard() {
-  const [tab, setTab] = useState("general");
+  const [tab, setTab] = useState("charts");
   const [data, setData] = useState({
     totalAmount: 0,
     totalProfit: 0,
@@ -61,14 +65,52 @@ export default function Dashboard() {
   const [categoryData, setCategoryData] = useState([]);
   const [locationData, setLocationData] = useState([]);
   const [productsData, setproductsData] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(
-    "NUBRAS GENTS KANDORA SECTION"
-  ); // Category selection
-  const [selectedCategoryForProducts, SetselectedCategoryForProducts] =
-    useState("NUBRAS GENTS KANDORA SECTION"); // Category selection
-  const [selectedLocation, setSelectedLocation] = useState("ABU DHABI"); // Location selection
+  const [selectedCategory, setSelectedCategory] = useState(""); // Category selection
+  const [selectedLocation, setSelectedLocation] = useState(""); // Location selection
   const [type, setType] = useState("");
   const [year, setYear] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [salesPerson, setsalesPerson] = useState("");
+  const [orderStatus, setOrderStatus] = useState("");
+  const [orderPaymentStatus, setorderPaymentStatus] = useState("");
+  const [personData, setpersonData] = useState([]);
+  const [chartDataForpersons, setchartDataForpersons] = useState<any[]>([]);
+  const exportToPdf = async () => {
+    const doc = new jsPDF();
+    const element = document.getElementById("container") as HTMLElement;
+
+    // Get the full height of the scrollable container
+    const totalHeight = element.scrollHeight;
+
+    // Scroll the container from top to bottom in chunks (if it's long)
+    let currentY = 0;
+    const chunkHeight = 500; // You can adjust this for how much to capture at a time
+
+    while (currentY < totalHeight) {
+      // Scroll the container to the current position
+      element.scrollTo(0, currentY);
+
+      // Capture the content
+      await new Promise<void>((resolve) => {
+        doc.html(element, {
+          callback: function (doc) {
+            if (currentY + chunkHeight >= totalHeight) {
+              // This is the last chunk, save the PDF
+              doc.save("exported-file.pdf");
+            } else {
+              // Otherwise, add the next chunk of content
+              currentY += chunkHeight;
+              resolve();
+            }
+          },
+          x: 10, // Left margin
+          y: 10, // Top margin (to ensure content starts at the top)
+          width: 180, // Width to fit the content
+          windowWidth: 800, // Virtual window width for scaling
+        });
+      });
+    }
+  };
 
   const [result, setResult] = useState<any[] | any>([]); // For storing API result
   const [loading, setLoading] = useState(false); // To show a loading state
@@ -130,6 +172,10 @@ export default function Dashboard() {
             half,
             startDate,
             endDate,
+            location: selectedLocation,
+            salesPerson,
+            orderStatus,
+            orderPaymentStatus,
           }),
         });
         const result = await response.json();
@@ -140,7 +186,64 @@ export default function Dashboard() {
     };
 
     fetchChartData();
-  }, [startDate, endDate, selectedPeriod, month, quarter, half]);
+  }, [
+    startDate,
+    endDate,
+    selectedPeriod,
+    month,
+    quarter,
+    half,
+    selectedLocation,
+    salesPerson,
+    orderStatus,
+    orderPaymentStatus,
+  ]);
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      if (
+        (selectedPeriod === "custom" && (!startDate || !endDate)) ||
+        (selectedPeriod !== "custom" && !month && !quarter && !half)
+      ) {
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/dashboard/sales/person", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: selectedPeriod,
+            month,
+            quarter,
+            half,
+            startDate,
+            endDate,
+            location: selectedLocation,
+            orderStatus,
+            orderPaymentStatus,
+          }),
+        });
+        const result = await response.json();
+        setpersonData(result);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+      }
+    };
+
+    fetchChartData();
+  }, [
+    startDate,
+    endDate,
+    selectedPeriod,
+    month,
+    quarter,
+    half,
+    selectedLocation,
+    salesPerson,
+    orderStatus,
+    orderPaymentStatus,
+  ]);
 
   // Fetch category data based on selected period and category
   useEffect(() => {
@@ -164,6 +267,10 @@ export default function Dashboard() {
             startDate,
             endDate,
             category: selectedCategory,
+            location,
+            salesPerson,
+            orderStatus,
+            orderPaymentStatus,
           }),
         });
         const result = await response.json();
@@ -182,6 +289,9 @@ export default function Dashboard() {
     quarter,
     half,
     selectedCategory,
+    salesPerson,
+    orderStatus,
+    orderPaymentStatus,
   ]);
 
   // Fetch category data based on selected period and category
@@ -205,7 +315,11 @@ export default function Dashboard() {
             half,
             startDate,
             endDate,
-            category: selectedCategoryForProducts,
+            category: selectedCategory,
+            location,
+            salesPerson,
+            orderStatus,
+            orderPaymentStatus,
           }),
         });
         const result = await response.json();
@@ -223,7 +337,7 @@ export default function Dashboard() {
     month,
     quarter,
     half,
-    selectedCategoryForProducts,
+    selectedCategory,
   ]);
 
   // Fetch location data based on selected period and location
@@ -268,8 +382,73 @@ export default function Dashboard() {
     selectedLocation,
   ]);
 
+  const selectedType = () => {
+    if (type == "month") {
+      return month;
+    } else if (type == "quarter") {
+      return quarter;
+    } else if (type === "half") {
+      return half;
+    }
+    return "";
+  };
+
+  const handleDoubleClick = (setValue: Dispatch<SetStateAction<string>>) => {
+    setValue(""); // Unselect the option on double-click
+  };
+
+  const [placeholder, setPlaceholder] = useState("");
+
+  useEffect(() => {
+    const selectedType = () => {
+      if (type === "month") {
+        setPlaceholder(month);
+      } else if (type === "quarter") {
+        setPlaceholder(quarter);
+      } else if (type === "half") {
+        setPlaceholder(half);
+      }
+    };
+
+    selectedType();
+  }, [type, month, quarter, half, setPlaceholder]);
+
+  // Prepare data for Recharts
+  // Assuming your API returns data with columns: year, total_sales, total_sales_count, and sales_person
+  // Prepare data for Recharts
+  // Assuming your API returns data with columns: year, total_sales, total_sales_count, and sales_person
+  function groupDataByYear(personData: any[]) {
+    const groupedData: any = {};
+
+    // Collect the data for each year
+    personData.forEach((row: any) => {
+      const {
+        year,
+        "SALES PERSON": salesPerson,
+        total_sales,
+        total_sales_count,
+      } = row;
+
+      if (!groupedData[year]) {
+        groupedData[year] = [];
+      }
+
+      groupedData[year].push({
+        salesPerson,
+        total_sales: parseInt(total_sales),
+        total_sales_count: parseInt(total_sales_count),
+      });
+    });
+
+    return groupedData;
+  }
+  const groupedData = groupDataByYear(personData);
+
   return (
-    <div className="w-full overflow-y-auto max-h-[calc(100vh-56px)]">
+    <div
+      className="w-full overflow-y-auto max-h-[calc(100vh-56px)] "
+      id="container"
+    >
       <div className="bg-white p-6 pb-0 w-full border-b border-gray-300">
         <div className="flex items-center justify-center w-full">
           <Image
@@ -294,8 +473,8 @@ export default function Dashboard() {
             </h1>
           </div>
           <div className="flex items-center gap-x-4">
-            <Button size="icon" variant="ghost">
-              <LucideShare2 />
+            <Button size="icon" variant="ghost" onClick={exportToPdf}>
+              <Download />
             </Button>
             <Button size="icon" variant="ghost">
               <Timer />
@@ -593,9 +772,87 @@ export default function Dashboard() {
                 />
               </>
             )}
+            <Select
+              value={selectedCategory}
+              onValueChange={(value) => setSelectedCategory(value)}
+            >
+              <SelectTrigger className="h-full bg-white max-w-max">
+                {selectedCategory || "Select Category"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NUBRAS GENTS KANDORA SECTION">
+                  NUBRAS GENTS KANDORA SECTION
+                </SelectItem>
+                <SelectItem value="NUBRAS JUNIOR KID'S SECTION">
+                  NUBRAS JUNIOR KID&apos;S SECTION
+                </SelectItem>
+                <SelectItem value="NUBRAS GENTS ITEM'S SECTION">
+                  NUBRAS GENTS ITEM&apos;S SECTION
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={selectedLocation}
+              onValueChange={(value) => setSelectedLocation(value)}
+            >
+              <SelectTrigger className="h-full bg-white max-w-max">
+                {selectedLocation || "select a location"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ABU DHABI">ABU DHABI</SelectItem>
+                <SelectItem value="PICKUP BY SHOP">PICKUP BY SHOP</SelectItem>
+                <SelectItem value="SHARJAH">SHARJAH</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={salesPerson}
+              onValueChange={(value) => setsalesPerson(value)}
+            >
+              <SelectTrigger className="h-full bg-white max-w-max">
+                {salesPerson || "Select sales person"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ADEEL">ADEEL</SelectItem>
+                <SelectItem value="EHSAN">EHSAN</SelectItem>
+                <SelectItem value="AZAD">AZAD</SelectItem>
+                <SelectItem value="M EHSAN">M EHSAN</SelectItem>
+                <SelectItem value="NASR">NASR</SelectItem>
+                <SelectItem value="MOHMOUD">MOHMOUD</SelectItem>
+                <SelectItem value="NAUSHAD">NAUSHAD</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={orderStatus}
+              onValueChange={(value) => setOrderStatus(value)}
+            >
+              <SelectTrigger className="h-full bg-white max-w-max">
+                {orderStatus || "Select order status"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="PENDING">PENDING</SelectItem>
+                <SelectItem value="DELIVERED">DELIVERED</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={orderPaymentStatus}
+              onValueChange={(value) => setorderPaymentStatus(value)}
+            >
+              <SelectTrigger className="h-full bg-white max-w-max">
+                {orderPaymentStatus || "Select order payment status"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NO PAYMENT">NO PAYMENT</SelectItem>
+                <SelectItem value="PARTIAL PAYMENT">ADVANCE PAID</SelectItem>
+                <SelectItem value="FULL PAYMENT">FULL PAID</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 my-4 px-4">
+          <div className="grid grid-cols-2 gap-4 gap-y-8 my-4 px-4">
             <Card>
               <CardHeader>
                 <CardTitle>Sales Data</CardTitle>
@@ -616,6 +873,7 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+            <SalesTable data={chartData} />
 
             <Card>
               <div className="flex items-center justify-between w-full pr-6">
@@ -625,25 +883,6 @@ export default function Dashboard() {
                     Sales data grouped by categories
                   </CardDescription>
                 </CardHeader>
-                <Select
-                  value={selectedCategory}
-                  onValueChange={(value) => setSelectedCategory(value)}
-                >
-                  <SelectTrigger className="h-full bg-white max-w-max">
-                    {selectedCategory || "Select Category"}
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="NUBRAS GENTS KANDORA SECTION">
-                      NUBRAS GENTS KANDORA SECTION
-                    </SelectItem>
-                    <SelectItem value="NUBRAS JUNIOR KID'S SECTION">
-                      NUBRAS JUNIOR KID&apos;S SECTION
-                    </SelectItem>
-                    <SelectItem value="NUBRAS GENTS ITEM'S SECTION">
-                      NUBRAS GENTS ITEM&apos;S SECTION
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               <CardContent>
                 <ResponsiveContainer width="100%" height={250}>
@@ -658,42 +897,22 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+            <SalesTable data={categoryData} />
 
             <Card>
               <div className="flex items-center justify-between w-full pr-6">
                 <CardHeader>
-                  <CardTitle>Sales by Products for category</CardTitle>
+                  <CardTitle>Sales by Products</CardTitle>
                   <CardDescription>
-                    Sales data grouped by Products according to category
+                    Sales data grouped by Products
                   </CardDescription>
                 </CardHeader>
-                <Select
-                  value={selectedCategoryForProducts}
-                  onValueChange={(value) =>
-                    SetselectedCategoryForProducts(value)
-                  }
-                >
-                  <SelectTrigger className="h-full bg-white max-w-max">
-                    {selectedCategoryForProducts || "Select Category"}
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="NUBRAS GENTS KANDORA SECTION">
-                      NUBRAS GENTS KANDORA SECTION
-                    </SelectItem>
-                    <SelectItem value="NUBRAS JUNIOR KID'S SECTION">
-                      NUBRAS JUNIOR KID&apos;S SECTION
-                    </SelectItem>
-                    <SelectItem value="NUBRAS GENTS ITEM'S SECTION">
-                      NUBRAS GENTS ITEM&apos;S SECTION
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               <CardContent>
                 <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={productsData} margin={{ left: 20 }}>
+                  <BarChart data={productsData} margin={{ left: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="product" tick={false}/>
+                    <XAxis dataKey="product" tick={false} />
                     <YAxis />
                     <Tooltip />
                     <Bar dataKey="total_sales" fill="#1E90FF" />
@@ -702,44 +921,51 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+            <SalesTable data={productsData} />
 
-            <Card>
+            <Card className="col-span-2">
               <div className="flex items-center justify-between w-full">
                 <CardHeader>
-                  <CardTitle>Sales by Locations</CardTitle>
+                  <CardTitle>Sales by person</CardTitle>
                   <CardDescription>
-                    Sales data grouped by locations
+                    Sales data grouped by person
                   </CardDescription>
                 </CardHeader>
-                <Select
-                  value={selectedLocation}
-                  onValueChange={(value) => setSelectedLocation(value)}
-                >
-                  <SelectTrigger className="h-full bg-white max-w-max mr-6">
-                    {selectedLocation}
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ABU DHABI">ABU DHABI</SelectItem>
-                    <SelectItem value="PICKUP BY SHOP">
-                      PICKUP BY SHOP
-                    </SelectItem>
-                    <SelectItem value="SHARJAH">SHARJAH</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={locationData} margin={{ left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="year" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="total_sales" fill="#82ca9d" />
-                    <Bar dataKey="total_quantity" fill="#343244" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="grid grid-cols-3 gap-2 gap-y-6">
+                  {Object.keys(groupedData).map((year) => (
+                    <div key={year}>
+                      <h3 className="mb-2 ml-4">{`Sales Data for ${year}`}</h3>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <BarChart data={groupedData[year]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="salesPerson" tick={false} />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+
+                          {/* Bar for total sales */}
+                          <Bar
+                            dataKey="total_sales"
+                            fill="#8884d8"
+                            name="Total Sales"
+                          />
+
+                          {/* Bar for total sales count */}
+                          <Bar
+                            dataKey="total_sales_count"
+                            fill="#82ca9d"
+                            name="Total Sales Count"
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
+            <SalesTable data={personData} className="col-span-2" />
           </div>
         </>
       )}

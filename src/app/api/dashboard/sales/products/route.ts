@@ -65,6 +65,7 @@ export async function POST(req: NextRequest) {
     return new NextResponse("Invalid period type!", { status: 400 });
   }
 
+  
   query += `
     GROUP BY 
       product

@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
     let query = `
       SELECT
-        EXTRACT(YEAR FROM "SALE ORDER DATE") AS year,
+        EXTRACT(YEAR FROM "SALE ORDER DATE") as year,
         SUM("TOTAL AMOUNT") AS total_sum,
         SUM("TAX AMOUNT") AS tax_sum,
         SUM("VISA PAYMENT") as visa_amount,

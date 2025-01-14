@@ -3,22 +3,22 @@ import { NextRequest, NextResponse } from "next/server";
 import client from "@/database";
 
 export async function POST(req: NextRequest) {
-  const { type, month, quarter, half, startDate, endDate , location, salesPerson, orderStatus, orderPaymentStatus} = await req.json();
+  const { type, month, quarter, half, startDate, endDate, location, salesPerson, orderStatus, orderPaymentStatus } = await req.json();
 
-  
   if (!type) {
     return new NextResponse("Missing required fields!", { status: 404 });
   }
-  
+
   const pg = await client.connect();
-  
+
   let query = `
-  SELECT EXTRACT(YEAR FROM "SALE ORDER DATE") AS year,
-      SUM("TOTAL AMOUNT") AS total_sales,
-      COUNT(*) AS total_sales_count
+    SELECT EXTRACT(YEAR FROM "SALE ORDER DATE") AS year,
+           "SALES PERSON",
+           SUM("TOTAL AMOUNT") AS total_sales,
+           COUNT(*) AS total_sales_count
     FROM Nubras_database_final1
   `;
-  
+
   let queryParams: any[] = [];
 
   if (type === "single") {
@@ -45,36 +45,36 @@ export async function POST(req: NextRequest) {
   } else if (type === "custom" && startDate && endDate) {
     const formattedStartDate = convertToDateFormat(startDate);
     const formattedEndDate = convertToDateFormat(endDate);
-    
+
     query += ` WHERE "SALE ORDER DATE" BETWEEN TO_DATE($1, 'YYYY-MM-DD') AND TO_DATE($2, 'YYYY-MM-DD')`;
     queryParams = [formattedStartDate, formattedEndDate];
   } else {
     return new NextResponse("Invalid period type!", { status: 400 });
   }
-  
+
   if (location && location !== "") {
     query += ` AND "CUSTOMER LOCATION" = $${queryParams.length + 1}`;
     queryParams.push(location);
   }
-  
+
   if (salesPerson && salesPerson !== "") {
     query += ` AND "SALES PERSON" = $${queryParams.length + 1}`;
     queryParams.push(salesPerson);
   }
-  
+
   if (orderStatus && orderStatus !== "") {
     query += ` AND "ORDER  STATUS" = $${queryParams.length + 1}`;
     queryParams.push(orderStatus);
   }
-  
+
   if (orderPaymentStatus && orderPaymentStatus !== "") {
     query += ` AND "ORDER PAYMENT STATUS" = $${queryParams.length + 1}`;
     queryParams.push(orderPaymentStatus);
   }
-  
-  // Ensure the GROUP BY and ORDER BY clauses are added only once
-  query += ` GROUP BY EXTRACT(YEAR FROM "SALE ORDER DATE") ORDER BY year ASC`;
-  
+
+  // Add GROUP BY for both YEAR and SALES PERSON
+  query += ` GROUP BY EXTRACT(YEAR FROM "SALE ORDER DATE"), "SALES PERSON" ORDER BY year ASC, "SALES PERSON" ASC`;
+
   try {
     const result = await pg.query(query, queryParams);
     pg.release();
@@ -85,7 +85,6 @@ export async function POST(req: NextRequest) {
     return new NextResponse("Error executing query", { status: 500 });
   }
 }
-
 
 function convertToDateFormat(date: string): string {
   const [year, month, day] = date.split("-");
