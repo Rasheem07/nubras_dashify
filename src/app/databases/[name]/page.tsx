@@ -6,9 +6,9 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useTable, usePagination } from "react-table";
-import * as XLSX from "xlsx"; // Import XLSX library
 
 export default function Home({ params }: { params: any }) {
   const { name } = React.use(params) as { name: string };
@@ -16,6 +16,7 @@ export default function Home({ params }: { params: any }) {
   const [loading, setLoading] = useState(true);
   const [pageCount, setPageCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [Downloading, setDownloading] = useState(false);
   const [date, setdate] = useState("");
   const pageSize = 100;
 
@@ -39,6 +40,22 @@ export default function Home({ params }: { params: any }) {
     },
     [name, date]
   );
+
+  // const DownloadData: () => Promise<void> = useCallback(async () => {
+  //   setDownloading(true);
+  //   try {
+  //     const response = await fetch(
+  //       `/api/database/get/download?name=${name}&date=${date}`
+  //     );
+  //     const result = await response.json();
+
+  //     setExportData(result.data);
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   } finally {
+  //     setDownloading(false);
+  //   }
+  // }, [name, date]);
 
   // Initial data fetch and when currentPage changes
   useEffect(() => {
@@ -83,13 +100,30 @@ export default function Home({ params }: { params: any }) {
   };
 
   // Function to export data to Excel
-  const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(data); // Convert data to worksheet
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Data"); // Add sheet to workbook
-    XLSX.writeFile(workbook, "table_data.xlsx"); // Generate and download the file
-  };
+  const DownloadData: () => Promise<void> = useCallback(async () => {
+    setDownloading(true);
+    try {
+      const response = await fetch(
+        `/api/database/get/download?name=${name}&date=${date}` // Ensure the correct API endpoint
+      );
 
+      if (!response.ok) {
+        throw new Error("Failed to fetch data for download");
+      }
+
+      const blob = await response.blob(); // Get the response as a Blob (binary data)
+      const url = window.URL.createObjectURL(blob); // Create a URL for the Blob
+      const a = document.createElement("a"); // Create a temporary anchor element
+      a.href = url;
+      a.download = `data_${name}_${date}.xlsx`; // Set filename for the download
+      a.click(); // Trigger the download
+      window.URL.revokeObjectURL(url); // Clean up the Blob URL
+    } catch (error) {
+      console.error("Error downloading data:", error);
+    } finally {
+      setDownloading(false);
+    }
+  }, [name, date]);
   return (
     <div className="p-6 max-h-[calc(100vh-56px)] overflow-y-scroll w-full">
       <div className="space-y-4">
@@ -119,7 +153,7 @@ export default function Home({ params }: { params: any }) {
           </div>
         </div>
         <div className="flex items-end justify-between gap-x-6 py-2">
-          <Select  onValueChange={setdate} value={date}>
+          <Select onValueChange={setdate} value={date}>
             <SelectTrigger className="w-[250px]">
               {date !== "" ? date : "Select a date range"}
             </SelectTrigger>
@@ -133,10 +167,17 @@ export default function Home({ params }: { params: any }) {
           {/* Excel Export Button */}
           <div className="mt-4">
             <button
-              onClick={exportToExcel}
-              className="px-6 py-1.5 bg-green-500 text-white rounded"
+              onClick={DownloadData}
+              className="px-6 py-2 min-w-32 flex gap-x-1 items-center justify-center bg-green-500 text-white rounded"
             >
-              Export to Excel
+              {Downloading ? (
+                <>
+                  <Loader2 className="animate-spin h-4 w-4" />
+                  Exporting data
+                </>
+              ) : (
+                <>Export to Excel</>
+              )}
             </button>
           </div>
         </div>
