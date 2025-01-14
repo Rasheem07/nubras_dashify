@@ -1,4 +1,3 @@
-// app/api/data/route.ts
 import client from "@/database";
 import {
   endOfYear,
@@ -19,6 +18,9 @@ export async function GET(req: NextRequest) {
   const page = parseInt(url.searchParams.get("page") || "1");
   const pageSize = parseInt(url.searchParams.get("pageSize") || "10");
   const offset = (page - 1) * pageSize;
+
+  const start = url.searchParams.get("start");
+  const end = url.searchParams.get("end");
 
   const pg = await client.connect();
 
@@ -52,6 +54,22 @@ export async function GET(req: NextRequest) {
     query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date ORDER BY id LIMIT $3 OFFSET $4';
     countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
     params.push(startWeekDate, endWeekDate);
+  } else if (date === "custom" && start && end) {
+    // For custom date range
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    
+    // Check if the dates are valid
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      return NextResponse.json(
+        { error: "Invalid start or end date" },
+        { status: 400 }
+      );
+    }
+
+    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date ORDER BY id LIMIT $3 OFFSET $4';
+    countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    params.push(startDate, endDate);
   } else {
     query += ' ORDER BY id LIMIT $1 OFFSET $2';
   }

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -17,17 +18,28 @@ export default function Home({ params }: { params: any }) {
   const [pageCount, setPageCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [Downloading, setDownloading] = useState(false);
+  const [dateRange, setdateRange] = useState<{
+    start: Date | null;
+    end: Date | null;
+  }>({
+    start: null,
+    end: null,
+  });
   const [date, setdate] = useState("");
   const pageSize = 100;
 
-  // Fetch data from the API
   const fetchData = useCallback(
     async (page: number) => {
       setLoading(true);
       try {
-        const response = await fetch(
-          `/api/database/get?page=${page}&pageSize=${pageSize}&name=${name}&date=${date}`
-        );
+        let url = `/api/database/get?page=${page}&pageSize=${pageSize}&name=${name}&date=${date}`;
+
+        // Append custom date range if selected and both dates are filled
+        if (date === "custom" && dateRange.start && dateRange.end) {
+          url += `&start=${dateRange.start.toISOString()}&end=${dateRange.end.toISOString()}`;
+        }
+
+        const response = await fetch(url);
         const result = await response.json();
 
         setData(result.data); // Use the data array
@@ -38,29 +50,17 @@ export default function Home({ params }: { params: any }) {
         setLoading(false);
       }
     },
-    [name, date]
+    [name, date, dateRange] // Make sure to include dateRange in the dependency array
   );
 
-  // const DownloadData: () => Promise<void> = useCallback(async () => {
-  //   setDownloading(true);
-  //   try {
-  //     const response = await fetch(
-  //       `/api/database/get/download?name=${name}&date=${date}`
-  //     );
-  //     const result = await response.json();
-
-  //     setExportData(result.data);
-  //   } catch (error) {
-  //     console.error("Error fetching data:", error);
-  //   } finally {
-  //     setDownloading(false);
-  //   }
-  // }, [name, date]);
-
-  // Initial data fetch and when currentPage changes
   useEffect(() => {
-    fetchData(currentPage);
-  }, [currentPage, fetchData, date]);
+    const timeout = setTimeout(() => {
+      fetchData(currentPage);
+    }, 1000);
+
+    // Cleanup timeout when component unmounts or when currentPage, date, or dateRange changes
+    return () => clearTimeout(timeout);
+  }, [currentPage, date, dateRange, fetchData]);
 
   // Dynamically generate table headers based on object keys
   const headers = useMemo(() => {
@@ -99,13 +99,17 @@ export default function Home({ params }: { params: any }) {
     }
   };
 
-  // Function to export data to Excel
   const DownloadData: () => Promise<void> = useCallback(async () => {
     setDownloading(true);
     try {
-      const response = await fetch(
-        `/api/database/get/download?name=${name}&date=${date}` // Ensure the correct API endpoint
-      );
+      let downloadUrl = `/api/database/get/download?name=${name}&date=${date}`;
+
+      // Include custom date range parameters if selected and both dates are filled
+      if (date === "custom" && dateRange.start && dateRange.end) {
+        downloadUrl += `&start=${dateRange.start.toISOString()}&end=${dateRange.end.toISOString()}`;
+      }
+
+      const response = await fetch(downloadUrl);
 
       if (!response.ok) {
         throw new Error("Failed to fetch data for download");
@@ -123,7 +127,8 @@ export default function Home({ params }: { params: any }) {
     } finally {
       setDownloading(false);
     }
-  }, [name, date]);
+  }, [name, date, dateRange]);
+
   return (
     <div className="p-6 max-h-[calc(100vh-56px)] overflow-y-scroll w-full">
       <div className="space-y-4">
@@ -153,17 +158,53 @@ export default function Home({ params }: { params: any }) {
           </div>
         </div>
         <div className="flex items-end justify-between gap-x-6 py-2">
-          <Select onValueChange={setdate} value={date}>
-            <SelectTrigger className="w-[250px]">
-              {date !== "" ? date : "Select a date range"}
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="year">Current year</SelectItem>
-              <SelectItem value="quarter">Current quarter</SelectItem>
-              <SelectItem value="month">Current month</SelectItem>
-              <SelectItem value="week">Current week</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-x-4">
+            <Select defaultValue="all" onValueChange={setdate} value={date}>
+              <SelectTrigger className="w-[250px]">
+                {date !== "" ? date : "Select a date range"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="year">Current year</SelectItem>
+                <SelectItem value="quarter">Current quarter</SelectItem>
+                <SelectItem value="month">Current month</SelectItem>
+                <SelectItem value="week">Current week</SelectItem>
+                <SelectItem value="custom">Custom date</SelectItem>
+              </SelectContent>
+            </Select>
+            {date === "custom" && (
+              <>
+                <div className="flex gap-x-4">
+                  <Input
+                    type="date"
+                    min="2020-01-01"
+                    max={new Date().toISOString().split("T")[0]} // Max is the current date
+                    onChange={(e) =>
+                      setdateRange((prev) => ({
+                        ...prev,
+                        start: e.target.value ? new Date(e.target.value) : null,
+                      }))
+                    }
+                    name="startDate"
+                    className="max-w-max"
+                  />
+                  <Input
+                    type="date"
+                    min="2020-01-01"
+                    max={new Date().toISOString().split("T")[0]} // Max is the current date
+                    onChange={(e) =>
+                      setdateRange((prev) => ({
+                        ...prev,
+                        end: e.target.value ? new Date(e.target.value) : null,
+                      }))
+                    }
+                    name="endDate"
+                    className="max-w-max"
+                  />
+                </div>
+              </>
+            )}
+          </div>
           {/* Excel Export Button */}
           <div className="mt-4">
             <button
