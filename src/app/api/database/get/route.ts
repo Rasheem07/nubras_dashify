@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
   const pg = await client.connect();
   
-  let query = `SELECT * FROM ${name}`;
+  let query = `SELECT * FROM ${name}  ORDER BY id LIMIT $1 OFFSET $2 `;
   
   // eslint-disable-next-line prefer-const
   let params: any[] = [];
@@ -25,31 +25,28 @@ export async function GET(req: NextRequest) {
   if (date === "year") {
     const startYear = startOfYear(new Date());  // Start of the current year
     const endYear = endOfYear(new Date());  // End of the current year
-    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date  ORDER BY id LIMIT $3 OFFSET $4';
     params.push(startYear, endYear);
     hasDateFilter = true;
   } else if (date === "month") {
     const startMonth = startOfMonth(new Date());  // Start of the current month
     const endMonth = endOfMonth(new Date());  // End of the current month
-    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date  ORDER BY id LIMIT $3 OFFSET $4';
     params.push(startMonth, endMonth);
     hasDateFilter = true;
   } else if (date === "quarter") {
     const startQuarter = startOfQuarter(new Date());  // Start of the current quarter
     const endQuarter = endOfQuarter(new Date());  // End of the current quarter
-    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date  ORDER BY id LIMIT $3 OFFSET $4';
     params.push(startQuarter, endQuarter);
     hasDateFilter = true;
   } else if (date === "week") {
     const startWeekDate = startOfWeek(new Date(), { weekStartsOn: 0 });  // Start of the current week (Sunday)
     const endWeekDate = endOfWeek(new Date(), { weekStartsOn: 0 });  // End of the current week (Saturday)
-    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date  ORDER BY id LIMIT $3 OFFSET $4';
     params.push(startWeekDate, endWeekDate);
     hasDateFilter = true;
-  }
-
-  // Pagination query handling
-  query += ' ORDER BY id LIMIT $3 OFFSET $4';
+  } 
 
   try {
     // Query the data for the current page
@@ -63,6 +60,7 @@ export async function GET(req: NextRequest) {
       totalCount, // Send the total row count to frontend
     }, { status: 200 });
   } catch (error: any) {
+    console.log(error.stack)
     return NextResponse.json({ error: 'Failed to fetch data', message: error.message }, { status: 500 });
   } finally {
     await pg.release();
