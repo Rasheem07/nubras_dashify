@@ -21,8 +21,6 @@ export async function POST(req: Request) {
         SUM("TOTAL AMOUNT") AS total_sum,
         SUM("TAX AMOUNT") AS tax_sum,
         SUM("VISA PAYMENT") as visa_amount,
-        SUM("BANK TRANSFER PAYMENT") as bank_transfer_amount,
-        SUM("CASH PAYMENT") as cash_payment,
         SUM("ADVANCE AMOUNT PAYMENT") as advance_payment,
         SUM("AMOUNT EXCLUDING TAX") as excl_tax_sum,
         SUM("BALANCE AMOUNT") as balance
@@ -96,7 +94,5 @@ export async function POST(req: Request) {
 // Helper function to format date as 'YYYY-MM-DD'
 function formatDateForPostgreSQL(date: string): string {
   const dateParts = date.split("-");
-  // Assuming the incoming date is in MM-DD format, we'll prepend the current year
-  const currentYear = new Date().getFullYear();
-  return `${currentYear}-${dateParts[0]}-${dateParts[1]}`;
+  return `${dateParts[0]}-${dateParts[2]}-${dateParts[1]}`;
 }

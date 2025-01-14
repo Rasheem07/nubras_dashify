@@ -15,8 +15,6 @@ type Data = {
   total_sum: string;
   tax_sum: string;
   visa_amount: string;
-  bank_transfer_amount: string;
-  cash_payment: string;
   advance_payment: string;
   excl_tax_sum: string;
   balance: string;
@@ -43,8 +41,6 @@ const FinancialCard: React.FC<CardProps> = ({ currentData, previousData, icon: I
     { field: "total_sum", label: "Total Sales" },
     { field: "tax_sum", label: "Total Tax Amount" },
     { field: "visa_amount", label: "Total Visa Amount" },
-    { field: "bank_transfer_amount", label: "Total Bank Transfer Amount" },
-    { field: "cash_payment", label: "Total Cash Payment" },
     { field: "advance_payment", label: "Total Advance Amount" },
     { field: "excl_tax_sum", label: "Total Amount Excluding Tax" },
     { field: "balance", label: "Total Balance Amount" },
@@ -72,12 +68,6 @@ const FinancialCard: React.FC<CardProps> = ({ currentData, previousData, icon: I
             break;
           case "visa_amount":
             FieldIcon = CreditCard; // Total Visa Amount
-            break;
-          case "bank_transfer_amount":
-            FieldIcon = Banknote; // Total Bank Transfer Amount
-            break;
-          case "cash_payment":
-            FieldIcon = CreditCard; // Total Cash Payment (Can use Credit Card for payments)
             break;
           case "advance_payment":
             FieldIcon = CreditCard; // Total Advance Amount (CreditCard can be used as an icon)
