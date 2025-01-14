@@ -1,16 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-// import TableFilter from "@/components/Header/tableFilterHeader";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useTable, usePagination } from "react-table";
+import * as XLSX from "xlsx"; // Import XLSX library
 
-// pages/index.js
 export default function Home({ params }: { params: any }) {
   const { name } = React.use(params) as { name: string };
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pageCount, setPageCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [date, setdate] = useState("");
   const pageSize = 100;
 
   // Fetch data from the API
@@ -19,7 +25,7 @@ export default function Home({ params }: { params: any }) {
       setLoading(true);
       try {
         const response = await fetch(
-          `/api/database/get?page=${page}&pageSize=${pageSize}&name=${name}`
+          `/api/database/get?page=${page}&pageSize=${pageSize}&name=${name}&date=${date}`
         );
         const result = await response.json();
 
@@ -31,13 +37,13 @@ export default function Home({ params }: { params: any }) {
         setLoading(false);
       }
     },
-    [name]
+    [name, date]
   );
 
   // Initial data fetch and when currentPage changes
   useEffect(() => {
     fetchData(currentPage);
-  }, [currentPage, fetchData]);
+  }, [currentPage, fetchData, date]);
 
   // Dynamically generate table headers based on object keys
   const headers = useMemo(() => {
@@ -76,12 +82,22 @@ export default function Home({ params }: { params: any }) {
     }
   };
 
+  // Function to export data to Excel
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(data); // Convert data to worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data"); // Add sheet to workbook
+    XLSX.writeFile(workbook, "table_data.xlsx"); // Generate and download the file
+  };
+
   return (
     <div className="p-6 max-h-[calc(100vh-56px)] overflow-y-scroll w-full">
       <div className="space-y-4">
         {/* Pagination Controls */}
         <div className="mt-4 flex flex-col md:flex-row justify-between md:items-center text-sm">
-          <h1 className="text-2xl font-semibold mb-4">Table for December 2024</h1>
+          <h1 className="text-2xl font-semibold mb-4">
+            Table for December 2024
+          </h1>
           <div className="space-x-4">
             <button
               onClick={handlePrevious}
@@ -102,7 +118,29 @@ export default function Home({ params }: { params: any }) {
             </button>
           </div>
         </div>
-        {/* <TableFilter setData={setData}/> */}
+        <div className="flex items-end justify-between gap-x-6 py-2">
+          <Select  onValueChange={setdate} value={date}>
+            <SelectTrigger className="w-[250px]">
+              {date !== "" ? date : "Select a date range"}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="year">Current year</SelectItem>
+              <SelectItem value="quarter">Current quarter</SelectItem>
+              <SelectItem value="month">Current month</SelectItem>
+              <SelectItem value="week">Current week</SelectItem>
+            </SelectContent>
+          </Select>
+          {/* Excel Export Button */}
+          <div className="mt-4">
+            <button
+              onClick={exportToExcel}
+              className="px-6 py-1.5 bg-green-500 text-white rounded"
+            >
+              Export to Excel
+            </button>
+          </div>
+        </div>
+
         {/* Table Wrapper */}
         <div className="overflow-x-auto max-w-[95vw]">
           <table
@@ -142,7 +180,7 @@ export default function Home({ params }: { params: any }) {
             {/* Table Body */}
             <tbody
               {...getTableBodyProps()}
-              className="overflow-y-auto max-h-96 min-h-[240px]" // Add a fixed min-height here to prevent collapsing
+              className="overflow-y-auto max-h-96 min-h-[240px]"
             >
               {loading ? (
                 // Loading Skeleton Rows
@@ -178,25 +216,22 @@ export default function Home({ params }: { params: any }) {
                             if (!value) {
                               return <span className="text-gray-400">N/A</span>;
                             }
-                            // Check if the column is for month and year
+
+                            // Check if the value is a number or string that can be converted to a number (for numerical fields)
                             if (
-                              cell.column.id.toLowerCase().includes("month") ||
-                              cell.column.id.toLowerCase().includes("year")
+                              typeof value === "number" ||
+                              !isNaN(Number(value))
                             ) {
-                              const date = new Date(value);
-                              if (!isNaN(date.getTime())) {
-                                return date.toLocaleDateString("default", {
-                                  year: "numeric",
-                                  month: "long",
-                                }); // Format as "Month Year" (e.g., "January 2024")
-                              }
+                              return cell.render("Cell"); // Render it as a number
                             }
-                            // Check if the value is a valid date
+
+                            // If the value is a valid date (not 'NEW INVOICE NUM')
                             const date = new Date(value);
                             if (!isNaN(date.getTime())) {
-                              return date.toLocaleDateString(); // Format as a local date string
+                              return date.toLocaleDateString("default");
                             }
-                            return cell.render("Cell"); // Render other values as is
+
+                            return cell.render("Cell"); // Otherwise, render the value as it is (text or other types)
                           })()}
                         </td>
                       ))}
