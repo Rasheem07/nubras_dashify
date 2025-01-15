@@ -1,93 +1,133 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextRequest, NextResponse } from "next/server";
+/* eslint-disable prefer-const */
 import client from "@/database";
+import {
+  endOfYear,
+  startOfYear,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  startOfQuarter,
+  endOfQuarter,
+  format,
+  getQuarter,
+  getWeek,
+  differenceInCalendarMonths,
+  differenceInCalendarQuarters,
+} from "date-fns";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
-  const { type, month, quarter, half, startDate, endDate , location, salesPerson, orderStatus, orderPaymentStatus} = await req.json();
-
+export async function GET(req: NextRequest) {
+    const url = new URL(req.url);
+    const date = url.searchParams.get("date") || ""; // Default to empty string if no date is provided
+    const start = url.searchParams.get("start");
+    const end = url.searchParams.get("end");
   
-  if (!type) {
-    return new NextResponse("Missing required fields!", { status: 404 });
+    const pg = await client.connect();
+  
+    let query = `SELECT `;
+    let groupBy = "";
+    let params: any[] = [];
+  
+    // Apply date filters and define grouping logic
+    if (date === "year") {
+      const startYear = startOfYear(new Date());
+      const endYear = endOfYear(new Date());
+      query += 'DATE_TRUNC(\'month\', "SALE ORDER DATE") AS period, SUM("TOTAL AMOUNT") AS total_amount, COUNT(*) AS count';
+      groupBy = 'GROUP BY period ORDER BY period';
+      params.push(startYear, endYear);
+      query += ' FROM Nubras_database_final1 WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date ';
+    } else if (date === "month") {
+      const startMonth = startOfMonth(new Date());
+      const endMonth = endOfMonth(new Date());
+      query += 'DATE_TRUNC(\'day\', "SALE ORDER DATE") AS period, SUM("TOTAL AMOUNT") AS total_amount, COUNT(*) AS count';
+      groupBy = 'GROUP BY period ORDER BY period';
+      params.push(startMonth, endMonth);
+      query += ' FROM Nubras_database_final1 WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date ';
+    } else if (date === "quarter") {
+      const startQuarter = startOfQuarter(new Date());
+      const endQuarter = endOfQuarter(new Date());
+      query += 'DATE_TRUNC(\'week\', "SALE ORDER DATE") AS period, SUM("TOTAL AMOUNT") AS total_amount, COUNT(*) AS count';
+      groupBy = 'GROUP BY period ORDER BY period';
+      params.push(startQuarter, endQuarter);
+      query += ' FROM Nubras_database_final1 WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date ';
+    } else if (date === "week") {
+      const startWeekDate = startOfWeek(new Date(), { weekStartsOn: 0 }); // Start of the current week (Sunday)
+      const endWeekDate = endOfWeek(new Date(), { weekStartsOn: 0 }); // End of the current week (Saturday)
+      query += 'DATE_TRUNC(\'day\', "SALE ORDER DATE") AS period, SUM("TOTAL AMOUNT") AS total_amount, COUNT(*) AS count';
+      groupBy = 'GROUP BY period ORDER BY period';
+      params.push(startWeekDate, endWeekDate);
+      query += ' FROM Nubras_database_final1 WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date ';
+    } else if (date === "custom" && start && end) {
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+  
+      // Check if the dates are valid
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return NextResponse.json({ error: "Invalid start or end date" }, { status: 400 });
+      }
+  
+      // Calculate the duration between start and end
+      const monthsDifference = differenceInCalendarMonths(endDate, startDate);
+      const quartersDifference = differenceInCalendarQuarters(endDate, startDate);
+  
+      // Logic to determine grouping based on the duration
+      if (monthsDifference > 3 && monthsDifference <= 12) {
+        // If the duration is more than a month but less than or equal to a quarter, group by week
+        query += 'DATE_TRUNC(\'day\', "SALE ORDER DATE") AS period, SUM("TOTAL AMOUNT") AS total_amount, COUNT(*) AS count';
+        groupBy = 'GROUP BY period ORDER BY period';
+      } else if (quartersDifference > 1) {
+        // If the duration is more than a quarter, group by month
+        query += 'DATE_TRUNC(\'month\', "SALE ORDER DATE") AS period, SUM("TOTAL AMOUNT") AS total_amount, COUNT(*) AS count';
+        groupBy = 'GROUP BY period ORDER BY period';
+      } else {
+        // Default to day grouping for custom date range
+        query += 'DATE_TRUNC(\'day\', "SALE ORDER DATE") AS period, SUM("TOTAL AMOUNT") AS total_amount, COUNT(*) AS count';
+        groupBy = 'GROUP BY period ORDER BY period';
+      }
+  
+      params.push(startDate, endDate);
+      query += ' FROM Nubras_database_final1 WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date ';
+    } else {
+      // Default behavior when date filter is missing or invalid: Return all records, grouped by month
+      query += 'DATE_TRUNC(\'month\', "SALE ORDER DATE") AS period, SUM("TOTAL AMOUNT") AS total_amount, COUNT(*) AS count';
+      groupBy = 'GROUP BY period ORDER BY period';
+      query += ' FROM Nubras_database_final1';  // No date restriction, return all records
+    }
+  
+    // Add grouping to the query
+    query += ` ${groupBy}`;
+  
+    try {
+      // Execute the query
+      const result = await pg.query(query, params);
+  
+      // Modify result to display the desired format for year, quarter, and week groupings
+      const formattedResult = result.rows.map((row) => {
+        if (date === "year") {
+          // For yearly grouped data, format as "Month Year"
+          const period = new Date(row.period);
+          row.period = format(period, "MMMM yyyy"); // "January 2025"
+        }
+  
+        if (date === "quarter") {
+          // For quarterly grouped data, format as "Week X of QY YYYY"
+          const period = new Date(row.period);
+          const quarter = getQuarter(period); // Get quarter number
+          const week = getWeek(period); // Get week number within the quarter
+          row.period = `Week ${week} of Q${quarter} ${period.getFullYear()}`; // "Week 1 of Q1 2025"
+        }
+  
+        return row;
+      });
+  
+      return NextResponse.json(formattedResult, { status: 200 });
+    } catch (error: any) {
+      console.log(error.stack);
+      return NextResponse.json({ error: "Failed to fetch data", message: error.message }, { status: 500 });
+    } finally {
+      await pg.release();
+    }
   }
   
-  const pg = await client.connect();
-  
-  let query = `
-  SELECT EXTRACT(YEAR FROM "SALE ORDER DATE") AS year,
-      SUM("TOTAL AMOUNT") AS total_sales,
-      COUNT(*) AS total_sales_count
-    FROM Nubras_database_final1
-  `;
-  
-  let queryParams: any[] = [];
-
-  if (type === "single") {
-    const [m, d] = startDate.split("-");
-    query += ` WHERE EXTRACT(MONTH FROM "SALE ORDER DATE") = $1 AND EXTRACT(DAY FROM "SALE ORDER DATE") = $2`;
-    queryParams = [m, d];
-  } else if (type === "month") {
-    query += ` WHERE EXTRACT(MONTH FROM "SALE ORDER DATE") = $1`;
-    queryParams = [month];
-  } else if (type === "quarter") {
-    const quarterMapping: { [key: string]: string } = {
-      q1: "1", q2: "2", q3: "3", q4: "4"
-    };
-    query += ` WHERE EXTRACT(QUARTER FROM "SALE ORDER DATE") = $1`;
-    queryParams = [quarterMapping[quarter]];
-  } else if (type === "half") {
-    const halfMapping: { [key: string]: string[] } = {
-      first: ["1", "2", "3", "4", "5", "6"],
-      second: ["7", "8", "9", "10", "11", "12"]
-    };
-    query += ` WHERE EXTRACT(MONTH FROM "SALE ORDER DATE") IN (${halfMapping[half].map((month) => `'${month}'`).join(", ")})`;
-  } else if (type === "year") {
-    query += ` WHERE EXTRACT(YEAR FROM "SALE ORDER DATE") IS NOT NULL`; // Ensure there's a year
-  } else if (type === "custom" && startDate && endDate) {
-    const formattedStartDate = convertToDateFormat(startDate);
-    const formattedEndDate = convertToDateFormat(endDate);
-    
-    query += ` WHERE "SALE ORDER DATE" BETWEEN TO_DATE($1, 'YYYY-MM-DD') AND TO_DATE($2, 'YYYY-MM-DD')`;
-    queryParams = [formattedStartDate, formattedEndDate];
-  } else {
-    return new NextResponse("Invalid period type!", { status: 400 });
-  }
-  
-  if (location && location !== "") {
-    query += ` AND "CUSTOMER LOCATION" = $${queryParams.length + 1}`;
-    queryParams.push(location);
-  }
-  
-  if (salesPerson && salesPerson !== "") {
-    query += ` AND "SALES PERSON" = $${queryParams.length + 1}`;
-    queryParams.push(salesPerson);
-  }
-  
-  if (orderStatus && orderStatus !== "") {
-    query += ` AND "ORDER  STATUS" = $${queryParams.length + 1}`;
-    queryParams.push(orderStatus);
-  }
-  
-  if (orderPaymentStatus && orderPaymentStatus !== "") {
-    query += ` AND "ORDER PAYMENT STATUS" = $${queryParams.length + 1}`;
-    queryParams.push(orderPaymentStatus);
-  }
-  
-  // Ensure the GROUP BY and ORDER BY clauses are added only once
-  query += ` GROUP BY EXTRACT(YEAR FROM "SALE ORDER DATE") ORDER BY year ASC`;
-  
-  try {
-    const result = await pg.query(query, queryParams);
-    pg.release();
-    return new NextResponse(JSON.stringify(result.rows), { status: 200 });
-  } catch (error: any) {
-    pg.release();
-    console.error("Error executing query:", error);
-    return new NextResponse("Error executing query", { status: 500 });
-  }
-}
-
-
-function convertToDateFormat(date: string): string {
-  const [year, month, day] = date.split("-");
-  return `${year}-${month}-${day}`; // Ensure it's in 'YYYY-MM-DD' format
-}

@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import { useEffect, useState, useRef, Dispatch, SetStateAction } from "react";
+import {
+  useEffect,
+  useState,
+  useRef,
+  Dispatch,
+  SetStateAction,
+  useCallback,
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
   Banknote,
@@ -28,6 +35,8 @@ import {
   Legend,
   Line,
   ReferenceLine,
+  Area,
+  AreaChart,
 } from "recharts";
 import {
   Select,
@@ -46,9 +55,11 @@ import {
 import FinancialCard from "./_components/NumberCard";
 import SalesTable from "./_components/salesTable";
 import { jsPDF } from "jspdf";
+import { Input } from "@/components/ui/input";
+import SalesAreaChart from "./_components/AreaChart";
 
 export default function Dashboard() {
-  const [tab, setTab] = useState("charts");
+  const [tab, setTab] = useState("dashboard");
   const [data, setData] = useState({
     totalAmount: 0,
     totalProfit: 0,
@@ -75,6 +86,16 @@ export default function Dashboard() {
   const [orderPaymentStatus, setorderPaymentStatus] = useState("");
   const [personData, setpersonData] = useState([]);
   const [chartDataForpersons, setchartDataForpersons] = useState<any[]>([]);
+  const [dateRange, setdateRange] = useState<{
+    start: Date | null;
+    end: Date | null;
+  }>({
+    start: null,
+    end: null,
+  });
+  const [date, setdate] = useState("");
+  const [RangeData, setRangeData] = useState<any[]>([]);
+
   const exportToPdf = async () => {
     const doc = new jsPDF();
     const element = document.getElementById("container") as HTMLElement;
@@ -162,7 +183,7 @@ export default function Dashboard() {
       }
 
       try {
-        const response = await fetch("/api/dashboard/sales", {
+        const response = await fetch("/api/dashboard/comparisons/sales", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -209,21 +230,24 @@ export default function Dashboard() {
       }
 
       try {
-        const response = await fetch("/api/dashboard/sales/person", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: selectedPeriod,
-            month,
-            quarter,
-            half,
-            startDate,
-            endDate,
-            location: selectedLocation,
-            orderStatus,
-            orderPaymentStatus,
-          }),
-        });
+        const response = await fetch(
+          "/api/dashboard/comparisons/sales/person",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: selectedPeriod,
+              month,
+              quarter,
+              half,
+              startDate,
+              endDate,
+              location: selectedLocation,
+              orderStatus,
+              orderPaymentStatus,
+            }),
+          }
+        );
         const result = await response.json();
         setpersonData(result);
       } catch (error) {
@@ -256,23 +280,26 @@ export default function Dashboard() {
       }
 
       try {
-        const response = await fetch("/api/dashboard/sales/category", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: selectedPeriod,
-            month,
-            quarter,
-            half,
-            startDate,
-            endDate,
-            category: selectedCategory,
-            location,
-            salesPerson,
-            orderStatus,
-            orderPaymentStatus,
-          }),
-        });
+        const response = await fetch(
+          "/api/dashboard/comparisons/sales/category",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: selectedPeriod,
+              month,
+              quarter,
+              half,
+              startDate,
+              endDate,
+              category: selectedCategory,
+              location,
+              salesPerson,
+              orderStatus,
+              orderPaymentStatus,
+            }),
+          }
+        );
         const result = await response.json();
         setCategoryData(result);
       } catch (error) {
@@ -305,23 +332,26 @@ export default function Dashboard() {
       }
 
       try {
-        const response = await fetch("/api/dashboard/sales/products", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: selectedPeriod,
-            month,
-            quarter,
-            half,
-            startDate,
-            endDate,
-            category: selectedCategory,
-            location,
-            salesPerson,
-            orderStatus,
-            orderPaymentStatus,
-          }),
-        });
+        const response = await fetch(
+          "/api/dashboard/comparisons/sales/products",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: selectedPeriod,
+              month,
+              quarter,
+              half,
+              startDate,
+              endDate,
+              category: selectedCategory,
+              location,
+              salesPerson,
+              orderStatus,
+              orderPaymentStatus,
+            }),
+          }
+        );
         const result = await response.json();
         setproductsData(result);
       } catch (error) {
@@ -338,6 +368,9 @@ export default function Dashboard() {
     quarter,
     half,
     selectedCategory,
+    salesPerson,
+    orderStatus,
+    orderPaymentStatus,
   ]);
 
   // Fetch location data based on selected period and location
@@ -351,19 +384,22 @@ export default function Dashboard() {
       }
 
       try {
-        const response = await fetch("/api/dashboard/sales/location", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: selectedPeriod,
-            month,
-            quarter,
-            half,
-            startDate,
-            endDate,
-            location: selectedLocation,
-          }),
-        });
+        const response = await fetch(
+          "/api/dashboard/comparisons/saleslocation",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: selectedPeriod,
+              month,
+              quarter,
+              half,
+              startDate,
+              endDate,
+              location: selectedLocation,
+            }),
+          }
+        );
         const result = await response.json();
         setLocationData(result);
       } catch (error) {
@@ -444,6 +480,58 @@ export default function Dashboard() {
   }
   const groupedData = groupDataByYear(personData);
 
+  const fetchData = async (page: number) => {
+    setLoading(true);
+    try {
+      let url = `/api/database/get?page=${page}&date=${date}`;
+
+      // Append custom date range if selected and both dates are filled
+      if (date === "custom" && dateRange.start && dateRange.end) {
+        url += `&start=${dateRange.start.toISOString()}&end=${dateRange.end.toISOString()}`;
+      }
+
+      const response = await fetch(url);
+      const result = await response.json();
+
+      setData(result.data); // Use the data arrayusing totalCount
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        let url = `/api/dashboard/sales?date=${date}`;
+
+        // Append custom date range if selected and both dates are filled
+        if (date === "custom" && dateRange.start && dateRange.end) {
+          url += `&start=${dateRange.start.toISOString()}&end=${dateRange.end.toISOString()}`;
+        }
+
+        const response = await fetch(url);
+        const result = await response.json();
+
+        console.log(result);
+        setRangeData(result); // Use the data arrayusing totalCount
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if(date =="custom") {  
+      if(dateRange.start && dateRange.end)   
+      fetchData();
+    } else {
+      fetchData();
+    }
+  }, [date, dateRange]);
+
   return (
     <div
       className="w-full overflow-y-auto max-h-[calc(100vh-56px)] "
@@ -489,7 +577,7 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center gap-x-4">
-          {["general", "charts", "transactions"].map((tabName) => (
+          {["general", "dashboard", "comparisons"].map((tabName) => (
             <Button
               key={tabName}
               variant="ghost"
@@ -677,9 +765,68 @@ export default function Dashboard() {
       {/* Category Selection Card */}
 
       {/* Location Selection Card */}
+      {tab == "dashboard" && (
+        <div className="space-y-6 p-4 max-w-7xl mx-auto">
+          <div className="flex items-center gap-x-4">
+            <Select defaultValue="all" onValueChange={setdate} value={date}>
+              <SelectTrigger className="w-[250px]">
+                {date !== "" ? date : "Select a date range"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="year">Current year</SelectItem>
+                <SelectItem value="quarter">Current quarter</SelectItem>
+                <SelectItem value="month">Current month</SelectItem>
+                <SelectItem value="week">Current week</SelectItem>
+                <SelectItem value="custom">Custom date</SelectItem>
+              </SelectContent>
+            </Select>
+            {date === "custom" && (
+              <>
+                <div className="flex gap-x-4">
+                  <Input
+                    type="date"
+                    min="2020-01-01"
+                    max={new Date().toISOString().split("T")[0]} // Max is the current date
+                    onChange={(e) =>
+                      setdateRange((prev) => ({
+                        ...prev,
+                        start: e.target.value ? new Date(e.target.value) : null,
+                      }))
+                    }
+                    name="startDate"
+                    className="max-w-max"
+                  />
+                  <Input
+                    type="date"
+                    min="2020-01-01"
+                    max={new Date().toISOString().split("T")[0]} // Max is the current date
+                    onChange={(e) =>
+                      setdateRange((prev) => ({
+                        ...prev,
+                        end: e.target.value ? new Date(e.target.value) : null,
+                      }))
+                    }
+                    name="endDate"
+                    className="max-w-max"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Sales Data according to selected date range</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <SalesAreaChart data={RangeData}/>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Chart Components */}
-      {tab == "charts" && (
+      {tab == "comparisons" && (
         <>
           {/* Date Range Selection */}
           <div className="mt-4 flex gap-4 flex-1 mx-4">
@@ -938,7 +1085,10 @@ export default function Dashboard() {
                     <div key={year}>
                       <h3 className="mb-2 ml-4">{`Sales Data for ${year}`}</h3>
                       <ResponsiveContainer width="100%" height={250}>
-                        <BarChart data={groupedData[year]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <BarChart
+                          data={groupedData[year]}
+                          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        >
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="salesPerson" tick={false} />
                           <YAxis />
