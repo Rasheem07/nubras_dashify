@@ -1,7 +1,8 @@
+import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import React from "react";
 import { useTable } from "react-table";
+import * as XLSX from "xlsx"; // Import the xlsx library
 
 // Data structure for sample input
 interface DataRow {
@@ -79,19 +80,35 @@ const Table = ({ data }: { data: DataRow[] }) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const SalesTable = ({ data , className}: { data: any[] ; className?: string}) => {
+const SalesTable = ({ data, className }: { data: any[]; className?: string }) => {
+  // Export function for Excel
+  const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(data); // Convert data to worksheet
+    const wb = XLSX.utils.book_new(); // Create a new workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Sales Data"); // Append the worksheet to the workbook
+    XLSX.writeFile(wb, "sales_data.xlsx"); // Trigger download as Excel file
+  };
+
   return (
     <div className={cn("max-h-[250px]", className)}>
+      <Card className="shadow-sm border border-gray-200 min-h-[365px] rounded-lg overflow-hidden">
+        <CardHeader className="p-4 flex flex-row justify-between items-center">
+          <div>
 
-    <Card className="shadow-sm border border-gray-200 min-h-[365px] rounded-lg overflow-hidden">
-      <CardHeader className="p-4">
-        <CardTitle>Sales Data Table</CardTitle>
-        <CardDescription>Sales data for the selected period</CardDescription>
-      </CardHeader>
-      <CardContent className="pb-4">
-        <Table data={data} />
-      </CardContent>
-    </Card>
+          <CardTitle className="max-w-max">Sales Data Table</CardTitle>
+          <CardDescription>Sales data for the selected period</CardDescription>
+          </div>
+          <button
+            onClick={exportToExcel}
+            className="px-4 py-2 max-w-max bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition"
+          >
+            Export Data
+          </button>
+        </CardHeader>
+        <CardContent className="pb-4">
+          <Table data={data} />
+        </CardContent>
+      </Card>
     </div>
   );
 };

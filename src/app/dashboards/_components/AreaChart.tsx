@@ -71,6 +71,7 @@ const SalesAreaChart: React.FC<{ data: any[] }> = ({ data }) => {
           name="Total sales amount"
           fillOpacity={1}
           fill="url(#colorUv)"
+          stackId="1"
         />
         <Area
           yAxisId="right"
@@ -80,6 +81,7 @@ const SalesAreaChart: React.FC<{ data: any[] }> = ({ data }) => {
           fillOpacity={1}
           name="Total no of sales"
           fill="url(#colorPv)"
+          stackId="1"
         />
 
       </AreaChart>

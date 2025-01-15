@@ -822,6 +822,7 @@ export default function Dashboard() {
                 <SalesAreaChart data={RangeData}/>
             </CardContent>
           </Card>
+             <SalesTable data={RangeData}/>
         </div>
       )}
 
