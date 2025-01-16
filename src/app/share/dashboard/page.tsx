@@ -970,7 +970,7 @@ export default function Dashboard() {
           </div>
           <Card>
             <CardHeader>
-              <CardTitle>Sales Data according to selected date range</CardTitle>
+              <CardTitle className="text-2xl" contentEditable>Sales Data according to selected date range</CardTitle>
             </CardHeader>
             <CardContent className="max-h-[250px] md:max-h-none">
               <SalesAreaChart data={RangeData} />
@@ -988,7 +988,7 @@ export default function Dashboard() {
 
       {/* Chart Components */}
       {tab == "comparisons" && (
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4 max-w-7xl mx-auto">
           {/* Date Range Selection */}
           <div className="flex gap-4 flex-1 flex-wrap">
             <Select
@@ -1225,8 +1225,8 @@ export default function Dashboard() {
           <div className="space-y-4 my-4">
             <Card>
               <CardHeader>
-                <CardTitle>Sales Data</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-2xl" contentEditable>Sales Data</CardTitle>
+                <CardDescription contentEditable>
                   Sales data for selected period
                 </CardDescription>
               </CardHeader>

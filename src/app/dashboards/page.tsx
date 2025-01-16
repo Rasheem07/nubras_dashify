@@ -64,6 +64,7 @@ import { Input } from "@/components/ui/input";
 import SalesAreaChart from "./_components/AreaChart";
 import Chart from "./_components/chart";
 import { ShareButtonWithModal } from "./_components/ShareButton";
+import SalesLocationChart from "./_components/SalesLocationChart";
 
 export default function Dashboard() {
   const [tab, setTab] = useState("dashboard");
@@ -602,7 +603,7 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center gap-x-4">
-          {["general", "dashboard", "comparisons"].map((tabName) => (
+          {["general", "dashboard", "comparisons", "map"].map((tabName) => (
             <Button
               key={tabName}
               variant="ghost"
@@ -1015,7 +1016,7 @@ export default function Dashboard() {
 
       {/* Chart Components */}
       {tab == "comparisons" && (
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4  max-w-7xl mx-auto">
           {/* Date Range Selection */}
           <div className="flex gap-4 flex-1 flex-wrap">
             <Select
@@ -1279,9 +1280,27 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+
             <SalesTable data={chartData} />
+
+            
           </div>
         </div>
+      )}
+
+      {tab === "map" && (
+
+            <Card className="m-4">
+              <CardHeader>
+                <CardTitle>Sales Data</CardTitle>
+                <CardDescription>
+                  Sales data for selected period
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SalesLocationChart />
+              </CardContent>
+            </Card>
       )}
     </div>
   );

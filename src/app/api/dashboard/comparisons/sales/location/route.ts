@@ -1,75 +1,58 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextRequest, NextResponse } from "next/server";
 import client from "@/database";
 
-export async function POST(req: NextRequest) {
-  const { type, month, quarter, half, startDate, endDate, location } = await req.json();
-
-  if (!type || !location) {
-    return new NextResponse("Missing required fields!", { status: 400 });
-  }
-
-  const pg = await client.connect();
-
-  let query = `
-    SELECT EXTRACT(YEAR FROM "SALE ORDER DATE") AS year,
-      SUM("TOTAL AMOUNT") AS total_sales,
-      COUNT(*) AS total_sales_count
-    FROM Nubras_database_final1
-    WHERE "CUSTOMER LOCATION" = $1
-  `;
-
-  // Query parameters
-  // eslint-disable-next-line prefer-const
-  let queryParams: any[] = [location];
-
-  if (type === "single") {
-    const [m, d] = startDate.split("-");
-    query += ` AND EXTRACT(MONTH FROM "SALE ORDER DATE") = $2 AND EXTRACT(DAY FROM "SALE ORDER DATE") = $3`;
-    queryParams.push(m, d);
-  } else if (type === "month") {
-    query += ` AND EXTRACT(MONTH FROM "SALE ORDER DATE") = $2`;
-    queryParams.push(month);
-  } else if (type === "quarter") {
-    const quarterMapping: { [key: string]: string } = {
-      q1: "1", q2: "2", q3: "3", q4: "4"
-    };
-    query += ` AND EXTRACT(QUARTER FROM "SALE ORDER DATE") = $2`;
-    queryParams.push(quarterMapping[quarter]);
-  } else if (type === "half") {
-    const halfMapping: { [key: string]: string[] } = {
-      first: ["1", "2", "3", "4", "5", "6"],
-      second: ["7", "8", "9", "10", "11", "12"]
-    };
-    query += ` AND EXTRACT(MONTH FROM "SALE ORDER DATE") IN (${halfMapping[half].map((month) => `'${month}'`).join(", ")})`;
-  } else if (type === "year") {
-    query += ` AND EXTRACT(YEAR FROM "SALE ORDER DATE") IS NOT NULL`;
-  } else if (type === "custom" && startDate && endDate) {
-    // Fix the date format to match the PostgreSQL date format
-    const formattedStartDate = convertToDateFormat(startDate);
-    const formattedEndDate = convertToDateFormat(endDate);
-
-    // Adjust query to use the proper date format
-    query += ` AND "SALE ORDER DATE" BETWEEN TO_DATE($2, 'YYYY-MM-DD') AND TO_DATE($3, 'YYYY-MM-DD')`;
-    queryParams.push(formattedStartDate, formattedEndDate);
-  } else {
-    return new NextResponse("Invalid period type!", { status: 400 });
-  }
-
-  query += ` GROUP BY EXTRACT(YEAR FROM "SALE ORDER DATE") ORDER BY year ASC`;
-
+export async function POST(): Promise<Response> {
   try {
-    const result = await pg.query(query, queryParams);
-    pg.release();
-    return new NextResponse(JSON.stringify(result.rows), { status: 200 });
-  } catch (error: any) {
-    pg.release();
-    console.error("Error executing query:", error);
-    return new NextResponse("Error executing query", { status: 500 });
-  }
-}
+    const pg = await client.connect();  // Connect to the database
 
-function convertToDateFormat(date: string): string {
-  const [year, month, day] = date.split("-");
-  return `${year}-${month}-${day}`; // Ensure it's in 'YYYY-MM-DD' format
+    // Define the SQL query
+    const query = `
+      SELECT 
+        EXTRACT(YEAR FROM "SALE ORDER DATE") AS "YEAR", 
+        "CUSTOMER LOCATION", 
+        SUM("TOTAL AMOUNT") AS "TOTAL AMOUNT", 
+        AVG(SUM("TOTAL AMOUNT")) OVER (PARTITION BY "CUSTOMER LOCATION") AS "AVERAGE AMOUNT"
+      FROM 
+        nubras_database_final1
+      GROUP BY 
+        EXTRACT(YEAR FROM "SALE ORDER DATE"), "CUSTOMER LOCATION"
+      ORDER BY 
+        "YEAR", "CUSTOMER LOCATION";
+    `;
+
+    // Execute the query
+    const result = await pg.query(query);
+
+    // Release the client back to the pool
+    pg.release();
+
+    const groupedData = result.rows.reduce((acc, row) => {
+      const year = row['YEAR'];
+      if (year) {
+        // Initialize the year object if it doesn't already exist
+        if (!acc[year]) {
+          acc[year] = [];
+        }
+    
+        // Add the row data to the corresponding year group
+        acc[year].push({
+          location: row['CUSTOMER LOCATION'],
+          total: row['TOTAL AMOUNT'],
+          average: row['AVERAGE AMOUNT']
+        });
+      }
+      return acc;
+    }, {} as { [year: string]: { location: string, total: number, average: number }[] });
+    
+    // Return the grouped data
+    return new Response(JSON.stringify(groupedData), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+  } catch (error) {
+    console.error('Error querying the database:', error);
+    return new Response('Error fetching data', { status: 500 });
+  }
 }
