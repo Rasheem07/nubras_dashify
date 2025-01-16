@@ -1,3 +1,4 @@
+
 import {
   ResponsiveContainer,
   AreaChart,
@@ -17,7 +18,7 @@ const SalesAreaChart: React.FC<{ data: any[] }> = ({ data }) => {
   const maxCount = Math.max(...data.map((d) => d.count)).toFixed(0);
 
   return (
-    <ResponsiveContainer height={450} width="100%">
+    <ResponsiveContainer className="hidden md:block" height={450} width="100%">
       <AreaChart
         data={data}
         margin={{ top: 5, right: 30, left: 20, bottom: 5 }}

@@ -1,6 +1,12 @@
+'use client'
 import { ArrowRight, BarChart, Bell } from "lucide-react";
 
 export default function Home() {
+
+  const router = useRouter();
+  useEffect(() => {
+    router.push('/databases')
+  }, [])
   return (
     <div className="space-y-16 max-h-[calc(100vh-56px)] w-full overflow-y-auto p-6">
       <div className="flex flex-col gap-y-4">
@@ -226,6 +232,8 @@ const GlobalAnnouncements: React.FC = () => {
 
 // TipsForUsingPlatform.tsx
 import { Lightbulb } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const TipsForUsingPlatform: React.FC = () => {
   return (

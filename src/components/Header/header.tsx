@@ -12,7 +12,7 @@ export default function Header() {
   const path = usePathname()
 
   return (
-    <div className={`w-full ${!path.startsWith("/dashboards") && 'border-b'} ${isSidebarOpen && 'border-b'} bg-white shadow-inner border-gray-300 h-14 flex items-center px-3 md:px-5 `}>
+    <div className={`w-full ${!path.startsWith("/dashboards") && 'border-b'} ${path.startsWith("/share") && 'hidden'} ${isSidebarOpen && 'border-b'} bg-white shadow-inner border-gray-300 h-14 flex items-center px-3 md:px-5 `}>
       <div className="flex items-center justify-between w-full">
         <Button
           variant={"ghost"}

@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils";
 
 const Sidebar: React.FC = () => {
   const { isSidebarOpen } = useSidebar();
-  const path = usePathname()
+  const path = usePathname();
+  const isSharePath = path.startsWith("/share");
   return (
     <div
       style={{
@@ -20,7 +21,7 @@ const Sidebar: React.FC = () => {
         overflow: "hidden",
         transitionTimingFunction: isSidebarOpen ? "ease-in" : "ease-out",
       }}
-      className={cn(" bg-white border-r w-full transition-all fixed md:relative left-0 z-10 max-h-[calc(100vh-56px)]", {isSidebarOpen: 'min-w-[275px]'})}
+      className={cn(" bg-white border-r w-full transition-all fixed md:relative left-0 z-10 max-h-[calc(100vh-56px)]", {isSidebarOpen: 'min-w-[275px]', 'hidden': isSharePath})}
     >
       {isSidebarOpen && (
         <div className="flex flex-col  h-full flex-1">

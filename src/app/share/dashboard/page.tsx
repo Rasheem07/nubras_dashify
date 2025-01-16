@@ -25,7 +25,6 @@ import {
   Ghost,
   MessageCircleWarningIcon,
   AreaChartIcon,
-  Share,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -49,7 +48,6 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import NumberCard from "./_components/NumberCard";
 import {
   Card,
   CardContent,
@@ -57,13 +55,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import FinancialCard from "./_components/NumberCard";
-import SalesTable from "./_components/salesTable";
 import { jsPDF } from "jspdf";
 import { Input } from "@/components/ui/input";
-import SalesAreaChart from "./_components/AreaChart";
-import Chart from "./_components/chart";
-import { ShareButtonWithModal } from "./_components/ShareButton";
+import FinancialCard from "@/app/dashboards/_components/NumberCard";
+import SalesAreaChart from "@/app/dashboards/_components/AreaChart";
+import SalesTable from "@/app/dashboards/_components/salesTable";
 
 export default function Dashboard() {
   const [tab, setTab] = useState("dashboard");
@@ -561,43 +557,20 @@ export default function Dashboard() {
 
   return (
     <div
-      className="w-full overflow-y-auto max-h-[calc(100vh-56px)] "
+      className="w-full"
       id="container"
     >
       <div className="bg-white p-6 pb-0 w-full border-b border-gray-300">
         <div className="flex items-center justify-center w-full">
-          <Image
-            src="/icons/full-logo.jpeg"
-            height={120}
-            width={140}
-            alt="Al Nubras Logo"
-            className="aspect-auto mix-blend-difference"
-          />
-        </div>
-        <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-between items-center mb-4">
-          <div className="flex items-center gap-x-2">
+          <div className="flex flex-col items-center">
             <Image
-              src="/icons/Logo.jpeg"
-              height={40}
-              width={40}
+              src="/icons/full-logo.jpeg"
+              height={100}
+              width={120}
+              quality={100}
               alt="Al Nubras Logo"
               className="aspect-auto mix-blend-difference"
             />
-            <h1 className="text-lg font-semibold text-gray-800">
-              Al-Nubras Sales Dashboard
-            </h1>
-          </div>
-          <div className="flex items-center gap-x-4">
-            <ShareButtonWithModal />
-            <Button size="icon" variant="ghost">
-              <Timer />
-            </Button>
-            <Button size="icon" variant="ghost">
-              <Bookmark />
-            </Button>
-            <Button size="icon" variant="ghost">
-              <Info />
-            </Button>
           </div>
         </div>
 

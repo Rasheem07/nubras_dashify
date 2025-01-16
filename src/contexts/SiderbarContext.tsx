@@ -20,7 +20,7 @@ interface SidebarProviderProps {
 
 // Sidebar provider component
 export const SidebarProvider: React.FC<SidebarProviderProps> = ({ children }) => {
-  const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   const toggleSidebar = () => setSidebarOpen(prev => !prev);
   const closeSidebar = () => setSidebarOpen(false);
