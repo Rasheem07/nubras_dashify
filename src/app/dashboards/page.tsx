@@ -21,6 +21,7 @@ import {
   TrendingDown,
   FormInput,
   Download,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -57,6 +58,7 @@ import SalesTable from "./_components/salesTable";
 import { jsPDF } from "jspdf";
 import { Input } from "@/components/ui/input";
 import SalesAreaChart from "./_components/AreaChart";
+import Chart from "./_components/chart";
 
 export default function Dashboard() {
   const [tab, setTab] = useState("dashboard");
@@ -93,7 +95,7 @@ export default function Dashboard() {
     start: null,
     end: null,
   });
-  const [date, setdate] = useState("");
+  const [date, setdate] = useState("all");
   const [RangeData, setRangeData] = useState<any[]>([]);
 
   const exportToPdf = async () => {
@@ -512,7 +514,17 @@ export default function Dashboard() {
           url += `&start=${dateRange.start.toISOString()}&end=${dateRange.end.toISOString()}`;
         }
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            category: selectedCategory,
+            location: selectedLocation,
+            salesPerson,
+            orderStatus,
+            orderPaymentStatus,
+          }),
+        });
         const result = await response.json();
 
         console.log(result);
@@ -524,13 +536,12 @@ export default function Dashboard() {
       }
     };
 
-    if(date =="custom") {  
-      if(dateRange.start && dateRange.end)   
-      fetchData();
+    if (date == "custom") {
+      if (dateRange.start && dateRange.end) fetchData();
     } else {
       fetchData();
     }
-  }, [date, dateRange]);
+  }, [date, dateRange, orderPaymentStatus, orderStatus, , salesPerson, selectedCategory, selectedLocation]);
 
   return (
     <div
@@ -766,7 +777,7 @@ export default function Dashboard() {
 
       {/* Location Selection Card */}
       {tab == "dashboard" && (
-        <div className="space-y-6 p-4 max-w-7xl mx-auto">
+        <div className="space-y-4 p-4 max-w-7xl mx-auto">
           <div className="flex items-center gap-x-4">
             <Select defaultValue="all" onValueChange={setdate} value={date}>
               <SelectTrigger className="w-[250px]">
@@ -813,24 +824,122 @@ export default function Dashboard() {
                 </div>
               </>
             )}
+            <Select
+              value={selectedCategory}
+              onValueChange={(value) => setSelectedCategory(value)}
+            >
+              <SelectTrigger className="h-full bg-white max-w-max">
+                {selectedCategory || "Select Category"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NUBRAS GENTS KANDORA SECTION">
+                  NUBRAS GENTS KANDORA SECTION
+                </SelectItem>
+                <SelectItem value="NUBRAS JUNIOR KID'S SECTION">
+                  NUBRAS JUNIOR KID&apos;S SECTION
+                </SelectItem>
+                <SelectItem value="NUBRAS GENTS ITEM'S SECTION">
+                  NUBRAS GENTS ITEM&apos;S SECTION
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={selectedLocation}
+              onValueChange={(value) => setSelectedLocation(value)}
+            >
+              <SelectTrigger className="h-full bg-white max-w-max">
+                {selectedLocation || "select a location"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ABU DHABI">ABU DHABI</SelectItem>
+                <SelectItem value="PICKUP BY SHOP">PICKUP BY SHOP</SelectItem>
+                <SelectItem value="SHARJAH">SHARJAH</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={salesPerson}
+              onValueChange={(value) => setsalesPerson(value)}
+            >
+              <SelectTrigger className="h-full bg-white max-w-max">
+                {salesPerson || "Select sales person"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ADEEL">ADEEL</SelectItem>
+                <SelectItem value="EHSAN">EHSAN</SelectItem>
+                <SelectItem value="AZAD">AZAD</SelectItem>
+                <SelectItem value="M EHSAN">M EHSAN</SelectItem>
+                <SelectItem value="NASR">NASR</SelectItem>
+                <SelectItem value="MOHMOUD">MOHMOUD</SelectItem>
+                <SelectItem value="NAUSHAD">NAUSHAD</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={orderStatus}
+              onValueChange={(value) => setOrderStatus(value)}
+            >
+              <SelectTrigger className="h-full bg-white max-w-max">
+                {orderStatus || "Select order status"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="PENDING">PENDING</SelectItem>
+                <SelectItem value="DELIVERED">DELIVERED</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={orderPaymentStatus}
+              onValueChange={(value) => setorderPaymentStatus(value)}
+            >
+              <SelectTrigger className="h-full bg-white max-w-max">
+                {orderPaymentStatus || "Select order payment status"}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NO PAYMENT">NO PAYMENT</SelectItem>
+                <SelectItem value="PARTIAL PAYMENT">ADVANCE PAID</SelectItem>
+                <SelectItem value="FULL PAYMENT">FULL PAID</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-x-4 border-t pt-2">
+            {date !== "all" && date && 
+            <Button onClick={() => setdate("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2 bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Date filter: {date} <X /></Button>
+            }
+            {selectedCategory && 
+            <Button onClick={() => setSelectedCategory("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Category filter: {selectedCategory} <X /></Button>
+            }
+            {selectedLocation && 
+            <Button onClick={() => setSelectedLocation("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Location filter: {selectedLocation} <X /></Button>
+            }
+            {salesPerson && 
+            <Button onClick={() => setsalesPerson("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Sales person filter: {salesPerson} <X /></Button>
+            }
+            {orderStatus && 
+            <Button onClick={() => setOrderStatus("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Order status filter: {orderStatus} <X /></Button>
+            }
+            {orderPaymentStatus && 
+            <Button onClick={() => setorderPaymentStatus("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Order payment status filter: {orderPaymentStatus} <X /></Button>
+            }
           </div>
           <Card>
             <CardHeader>
               <CardTitle>Sales Data according to selected date range</CardTitle>
             </CardHeader>
             <CardContent>
-                <SalesAreaChart data={RangeData}/>
+              <SalesAreaChart data={RangeData} />
             </CardContent>
           </Card>
-             <SalesTable data={RangeData}/>
+          <SalesTable data={RangeData} />
         </div>
       )}
 
       {/* Chart Components */}
       {tab == "comparisons" && (
-        <>
+        <div className="p-4 space-y-4">
           {/* Date Range Selection */}
-          <div className="mt-4 flex gap-4 flex-1 mx-4">
+          <div className="flex gap-4 flex-1">
             <Select
               value={selectedPeriod}
               onValueChange={(value) => setSelectedPeriod(value)}
@@ -998,8 +1107,29 @@ export default function Dashboard() {
                 <SelectItem value="FULL PAYMENT">FULL PAID</SelectItem>
               </SelectContent>
             </Select>
+            
           </div>
 
+          <div className="flex items-center gap-x-4 border-t pt-2">
+            {date !== "all" && date && 
+            <Button onClick={() => setdate("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2 bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Date filter: {date} <X /></Button>
+            }
+            {selectedCategory && 
+            <Button onClick={() => setSelectedCategory("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Category filter: {selectedCategory} <X /></Button>
+            }
+            {selectedLocation && 
+            <Button onClick={() => setSelectedLocation("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Location filter: {selectedLocation} <X /></Button>
+            }
+            {salesPerson && 
+            <Button onClick={() => setsalesPerson("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Sales person filter: {salesPerson} <X /></Button>
+            }
+            {orderStatus && 
+            <Button onClick={() => setOrderStatus("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Order status filter: {orderStatus} <X /></Button>
+            }
+            {orderPaymentStatus && 
+            <Button onClick={() => setorderPaymentStatus("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Order payment status filter: {orderPaymentStatus} <X /></Button>
+            }
+          </div>
           <div className="grid grid-cols-2 gap-4 gap-y-8 my-4 px-4">
             <Card>
               <CardHeader>
@@ -1070,6 +1200,10 @@ export default function Dashboard() {
               </CardContent>
             </Card>
             <SalesTable data={productsData} />
+          <Card className="col-span-2">
+
+          <Chart />
+          </Card>
 
             <Card className="col-span-2">
               <div className="flex items-center justify-between w-full">
@@ -1118,7 +1252,7 @@ export default function Dashboard() {
             </Card>
             <SalesTable data={personData} className="col-span-2" />
           </div>
-        </>
+        </div>
       )}
     </div>
   );
