@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import client from "@/database";
 
 export async function POST(req: NextRequest) {
-  const { type, month, quarter, half, startDate, endDate , location, salesPerson, orderStatus, orderPaymentStatus} = await req.json();
+  const { type, month, quarter, half, startDate, endDate , category, location, salesPerson, orderStatus, orderPaymentStatus} = await req.json();
 
   
   if (!type) {
@@ -70,6 +70,12 @@ export async function POST(req: NextRequest) {
   if (orderPaymentStatus && orderPaymentStatus !== "") {
     query += ` AND "ORDER PAYMENT STATUS" = $${queryParams.length + 1}`;
     queryParams.push(orderPaymentStatus);
+  }
+  
+  
+  if (category && category !== "") {
+    query += ` AND "category" = $${queryParams.length + 1}`;
+    queryParams.push(category);
   }
   
   // Ensure the GROUP BY and ORDER BY clauses are added only once

@@ -195,6 +195,7 @@ export default function Dashboard() {
             half,
             startDate,
             endDate,
+            category: selectedCategory,
             location: selectedLocation,
             salesPerson,
             orderStatus,
@@ -220,6 +221,7 @@ export default function Dashboard() {
     salesPerson,
     orderStatus,
     orderPaymentStatus,
+    selectedCategory
   ]);
 
   useEffect(() => {
@@ -778,9 +780,9 @@ export default function Dashboard() {
       {/* Location Selection Card */}
       {tab == "dashboard" && (
         <div className="space-y-4 p-4 max-w-7xl mx-auto">
-          <div className="flex items-center gap-x-4">
+          <div className="flex items-center gap-x-4 gap-y-2 flex-1 flex-wrap">
             <Select defaultValue="all" onValueChange={setdate} value={date}>
-              <SelectTrigger className="w-[250px]">
+              <SelectTrigger className="w-[250px] bg-white">
                 {date !== "" ? date : "Select a date range"}
               </SelectTrigger>
               <SelectContent>
@@ -805,6 +807,7 @@ export default function Dashboard() {
                         start: e.target.value ? new Date(e.target.value) : null,
                       }))
                     }
+                    value={dateRange.start ? dateRange.start.toISOString().split("T")[0] : ""}
                     name="startDate"
                     className="max-w-max"
                   />
@@ -818,6 +821,8 @@ export default function Dashboard() {
                         end: e.target.value ? new Date(e.target.value) : null,
                       }))
                     }
+                    value={dateRange.end ? dateRange.end.toISOString().split("T")[0] : ""}
+
                     name="endDate"
                     className="max-w-max"
                   />
@@ -905,7 +910,7 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-x-4 border-t pt-2">
             {date !== "all" && date && 
-            <Button onClick={() => setdate("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2 bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Date filter: {date} <X /></Button>
+            <Button onClick={() => setdate("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2 bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Date filter: {date === "custom"? dateRange.start?.toDateString() + ' to ' + dateRange.end?.toDateString() : date} <X /></Button>
             }
             {selectedCategory && 
             <Button onClick={() => setSelectedCategory("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Category filter: {selectedCategory} <X /></Button>
@@ -939,7 +944,7 @@ export default function Dashboard() {
       {tab == "comparisons" && (
         <div className="p-4 space-y-4">
           {/* Date Range Selection */}
-          <div className="flex gap-4 flex-1">
+          <div className="flex gap-4 flex-1 flex-wrap">
             <Select
               value={selectedPeriod}
               onValueChange={(value) => setSelectedPeriod(value)}
@@ -959,7 +964,7 @@ export default function Dashboard() {
             </Select>
 
             {/* Single Day, Month, Quarter, Half Year Inputs */}
-            {selectedPeriod === "single" && (
+            {/* {selectedPeriod === "single" && (
               <input
                 type="text"
                 value={month}
@@ -967,7 +972,7 @@ export default function Dashboard() {
                 className="border p-2"
                 placeholder="Month (MM)"
               />
-            )}
+            )} */}
             {selectedPeriod === "month" && (
               <Select value={month} onValueChange={(value) => setMonth(value)}>
                 <SelectTrigger className="h-full bg-white w-[160px]">
@@ -1111,8 +1116,8 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-x-4 border-t pt-2">
-            {date !== "all" && date && 
-            <Button onClick={() => setdate("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2 bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Date filter: {date} <X /></Button>
+            {selectedPeriod && 
+            <Button onClick={() => setdate("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2 bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Selected period: {selectedPeriod} <X /></Button>
             }
             {selectedCategory && 
             <Button onClick={() => setSelectedCategory("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Category filter: {selectedCategory} <X /></Button>
@@ -1130,7 +1135,7 @@ export default function Dashboard() {
             <Button onClick={() => setorderPaymentStatus("")} size={"sm"} variant={"outline"} className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100">Order payment status filter: {orderPaymentStatus} <X /></Button>
             }
           </div>
-          <div className="grid grid-cols-2 gap-4 gap-y-8 my-4 px-4">
+          <div className="space-y-4 my-4">
             <Card>
               <CardHeader>
                 <CardTitle>Sales Data</CardTitle>
@@ -1139,118 +1144,22 @@ export default function Dashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
+                <ResponsiveContainer width="100%" height={350}>
                   <BarChart data={chartData} margin={{ left: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="year" />
-                    <YAxis />
+                    <YAxis yAxisId="total_sales" />
+                    <YAxis yAxisId="total_count" orientation="right"/>
                     <Tooltip />
-                    <Bar dataKey="total_sales" fill="#8884d8" />
-                    <Bar dataKey="total_sales_count" fill="#82ca9d" />
+                    <Bar yAxisId="total_sales" dataKey="total_sales" fill="#8884d8" />
+                    <Bar  yAxisId="total_count" dataKey="total_sales_count" fill="#82ca9d" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
             <SalesTable data={chartData} />
 
-            <Card>
-              <div className="flex items-center justify-between w-full pr-6">
-                <CardHeader>
-                  <CardTitle>Sales by Category</CardTitle>
-                  <CardDescription>
-                    Sales data grouped by categories
-                  </CardDescription>
-                </CardHeader>
-              </div>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={categoryData} margin={{ left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="year" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="total_sales" fill="#2196f3" />
-                    <Bar dataKey="total_quantity" fill="#343244" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-            <SalesTable data={categoryData} />
-
-            <Card>
-              <div className="flex items-center justify-between w-full pr-6">
-                <CardHeader>
-                  <CardTitle>Sales by Products</CardTitle>
-                  <CardDescription>
-                    Sales data grouped by Products
-                  </CardDescription>
-                </CardHeader>
-              </div>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={productsData} margin={{ left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="product" tick={false} />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="total_sales" fill="#1E90FF" />
-                    <Bar dataKey="total_quantity" fill="#32CD32" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-            <SalesTable data={productsData} />
-          <Card className="col-span-2">
-
-          <Chart />
-          </Card>
-
-            <Card className="col-span-2">
-              <div className="flex items-center justify-between w-full">
-                <CardHeader>
-                  <CardTitle>Sales by person</CardTitle>
-                  <CardDescription>
-                    Sales data grouped by person
-                  </CardDescription>
-                </CardHeader>
-              </div>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-2 gap-y-6">
-                  {Object.keys(groupedData).map((year) => (
-                    <div key={year}>
-                      <h3 className="mb-2 ml-4">{`Sales Data for ${year}`}</h3>
-                      <ResponsiveContainer width="100%" height={250}>
-                        <BarChart
-                          data={groupedData[year]}
-                          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="salesPerson" tick={false} />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-
-                          {/* Bar for total sales */}
-                          <Bar
-                            dataKey="total_sales"
-                            fill="#8884d8"
-                            name="Total Sales"
-                          />
-
-                          {/* Bar for total sales count */}
-                          <Bar
-                            dataKey="total_sales_count"
-                            fill="#82ca9d"
-                            name="Total Sales Count"
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            <SalesTable data={personData} className="col-span-2" />
+      
           </div>
         </div>
       )}

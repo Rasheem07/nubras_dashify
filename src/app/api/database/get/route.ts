@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import client from "@/database";
 import {
   endOfYear,
@@ -11,13 +12,14 @@ import {
 } from "date-fns";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const url = new URL(req.url);
   const name = url.searchParams.get("name");
-  const date = url.searchParams.get("date") || ""; // Default to empty string if no date is provided
+  const date = url.searchParams.get("date") || "";
   const page = parseInt(url.searchParams.get("page") || "1");
   const pageSize = parseInt(url.searchParams.get("pageSize") || "10");
   const offset = (page - 1) * pageSize;
+  const { category, location, salesPerson, orderStatus, orderPaymentStatus } = await req.json();
 
   const start = url.searchParams.get("start");
   const end = url.searchParams.get("end");
@@ -25,41 +27,64 @@ export async function GET(req: NextRequest) {
   const pg = await client.connect();
 
   let query = `SELECT * FROM ${name}`;
-  let countQuery = `SELECT COUNT(*) FROM ${name}`; // Count query without pagination
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, prefer-const
+  let countQuery = `SELECT COUNT(*) FROM ${name}`;
+  // eslint-disable-next-line prefer-const
   let params: any[] = [];
+  let whereClauseAdded = false; // Flag to track if WHERE clause is added
 
   // Apply date filters based on the query parameter
   if (date === "year") {
-    const startYear = startOfYear(new Date()); // Start of the current year
-    const endYear = endOfYear(new Date()); // End of the current year
-    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date ORDER BY id LIMIT $3 OFFSET $4';
-    countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    const startYear = startOfYear(new Date());
+    const endYear = endOfYear(new Date());
+    if (!whereClauseAdded) {
+      query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      whereClauseAdded = true;
+    } else {
+      query += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      countQuery += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    }
     params.push(startYear, endYear);
   } else if (date === "month") {
-    const startMonth = startOfMonth(new Date()); // Start of the current month
-    const endMonth = endOfMonth(new Date()); // End of the current month
-    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date ORDER BY id LIMIT $3 OFFSET $4';
-    countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    const startMonth = startOfMonth(new Date());
+    const endMonth = endOfMonth(new Date());
+    if (!whereClauseAdded) {
+      query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      whereClauseAdded = true;
+    } else {
+      query += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      countQuery += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    }
     params.push(startMonth, endMonth);
   } else if (date === "quarter") {
-    const startQuarter = startOfQuarter(new Date()); // Start of the current quarter
-    const endQuarter = endOfQuarter(new Date()); // End of the current quarter
-    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date ORDER BY id LIMIT $3 OFFSET $4';
-    countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    const startQuarter = startOfQuarter(new Date());
+    const endQuarter = endOfQuarter(new Date());
+    if (!whereClauseAdded) {
+      query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      whereClauseAdded = true;
+    } else {
+      query += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      countQuery += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    }
     params.push(startQuarter, endQuarter);
   } else if (date === "week") {
-    const startWeekDate = startOfWeek(new Date(), { weekStartsOn: 0 }); // Start of the current week (Sunday)
-    const endWeekDate = endOfWeek(new Date(), { weekStartsOn: 0 }); // End of the current week (Saturday)
-    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date ORDER BY id LIMIT $3 OFFSET $4';
-    countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    const startWeekDate = startOfWeek(new Date(), { weekStartsOn: 0 });
+    const endWeekDate = endOfWeek(new Date(), { weekStartsOn: 0 });
+    if (!whereClauseAdded) {
+      query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      whereClauseAdded = true;
+    } else {
+      query += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      countQuery += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    }
     params.push(startWeekDate, endWeekDate);
   } else if (date === "custom" && start && end) {
-    // For custom date range
     const startDate = new Date(start);
     const endDate = new Date(end);
     
-    // Check if the dates are valid
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       return NextResponse.json(
         { error: "Invalid start or end date" },
@@ -67,34 +92,100 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date ORDER BY id LIMIT $3 OFFSET $4';
-    countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    if (!whereClauseAdded) {
+      query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      whereClauseAdded = true;
+    } else {
+      query += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      countQuery += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+    }
     params.push(startDate, endDate);
-  } else {
-    query += ' ORDER BY id LIMIT $1 OFFSET $2';
   }
 
-  // For pagination, the same params are added to both queries
-  const paginatedParams = [...params, pageSize, offset];
+  // Apply filters for location, salesPerson, orderStatus, orderPaymentStatus, and category
+  if (location && location !== "") {
+    if (!whereClauseAdded) {
+      query += ` WHERE "CUSTOMER LOCATION" = $${params.length + 1}`;
+      countQuery += ` WHERE "CUSTOMER LOCATION" = $${params.length + 1}`;
+      whereClauseAdded = true;
+    } else {
+      query += ` AND "CUSTOMER LOCATION" = $${params.length + 1}`;
+      countQuery += ` AND "CUSTOMER LOCATION" = $${params.length + 1}`;
+    }
+    params.push(location);
+  }
+  
+  if (salesPerson && salesPerson !== "") {
+    if (!whereClauseAdded) {
+      query += ` WHERE "SALES PERSON" = $${params.length + 1}`;
+      countQuery += ` WHERE "SALES PERSON" = $${params.length + 1}`;
+      whereClauseAdded = true;
+    } else {
+      query += ` AND "SALES PERSON" = $${params.length + 1}`;
+      countQuery += ` AND "SALES PERSON" = $${params.length + 1}`;
+    }
+    params.push(salesPerson);
+  }
+  
+  if (orderStatus && orderStatus !== "") {
+    if (!whereClauseAdded) {
+      query += ` WHERE "ORDER STATUS" = $${params.length + 1}`;
+      countQuery += ` WHERE "ORDER STATUS" = $${params.length + 1}`;
+      whereClauseAdded = true;
+    } else {
+      query += ` AND "ORDER STATUS" = $${params.length + 1}`;
+      countQuery += ` AND "ORDER STATUS" = $${params.length + 1}`;
+    }
+    params.push(orderStatus);
+  }
+  
+  if (orderPaymentStatus && orderPaymentStatus !== "") {
+    if (!whereClauseAdded) {
+      query += ` WHERE "ORDER PAYMENT STATUS" = $${params.length + 1}`;
+      countQuery += ` WHERE "ORDER PAYMENT STATUS" = $${params.length + 1}`;
+      whereClauseAdded = true;
+    } else {
+      query += ` AND "ORDER PAYMENT STATUS" = $${params.length + 1}`;
+      countQuery += ` AND "ORDER PAYMENT STATUS" = $${params.length + 1}`;
+    }
+    params.push(orderPaymentStatus);
+  }
+  
+  if (category && category !== "") {
+    if (!whereClauseAdded) {
+      query += ` WHERE "category" = $${params.length + 1}`;
+      countQuery += ` WHERE "category" = $${params.length + 1}`;
+      whereClauseAdded = true;
+    } else {
+      query += ` AND "category" = $${params.length + 1}`;
+      countQuery += ` AND "category" = $${params.length + 1}`;
+    }
+    params.push(category);
+  }
+  
+  // Add LIMIT and OFFSET at the end of the query for pagination
+  query += ` ORDER BY id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+  params.push(pageSize, offset);
 
+  console.log(query)
+  // For countQuery, no pagination parameters should be included
   try {
     // Query the data for the current page
-    const result = await pg.query(query, paginatedParams);
+    const result = await pg.query(query, params);
 
     // Query the count of all records with the applied filter (no pagination for count)
-    const countResult = await pg.query(countQuery, params);
+    const countResult = await pg.query(countQuery, params.slice(0, -2)); // Exclude pagination params from count query
 
-    // Use countResult.rows[0].count to get the total filtered record count
     const totalCount = parseInt(countResult.rows[0].count);
 
     return NextResponse.json(
       {
         data: result.rows,
-        totalCount, // Send the total filtered count to frontend
+        totalCount,
       },
       { status: 200 }
     );
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.log(error.stack);
     return NextResponse.json(
@@ -105,3 +196,4 @@ export async function GET(req: NextRequest) {
     await pg.release();
   }
 }
+

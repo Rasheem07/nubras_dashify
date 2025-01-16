@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { cn } from "@/lib/utils";
 import { useTable } from "react-table";
 import * as XLSX from "xlsx"; // Import the xlsx library
+import { Button } from "@/components/ui/button";
 
 // Data structure for sample input
 interface DataRow {
@@ -98,12 +99,13 @@ const SalesTable = ({ data, className }: { data: any[]; className?: string }) =>
           <CardTitle className="max-w-max">Sales Data Table</CardTitle>
           <CardDescription>Sales data for the selected period</CardDescription>
           </div>
-          <button
+          <Button
             onClick={exportToExcel}
-            className="px-4 py-2 max-w-max bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition"
+            size={"sm"}
+            className="px-6 py-2 max-w-max bg-teal-500 text-white hover:bg-teal-600"
           >
             Export Data
-          </button>
+          </Button>
         </CardHeader>
         <CardContent className="pb-4">
           <Table data={data} />

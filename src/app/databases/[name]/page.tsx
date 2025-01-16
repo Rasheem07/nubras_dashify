@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -7,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useTable, usePagination } from "react-table";
 
@@ -27,6 +28,11 @@ export default function Home({ params }: { params: any }) {
   });
   const [date, setdate] = useState("");
   const pageSize = 100;
+  const [selectedCategory, setSelectedCategory] = useState(""); // Category selection
+  const [selectedLocation, setSelectedLocation] = useState(""); // Location selection
+  const [salesPerson, setsalesPerson] = useState("");
+  const [orderStatus, setOrderStatus] = useState("");
+  const [orderPaymentStatus, setorderPaymentStatus] = useState("");
 
   const fetchData = useCallback(
     async (page: number) => {
@@ -39,7 +45,19 @@ export default function Home({ params }: { params: any }) {
           url += `&start=${dateRange.start.toISOString()}&end=${dateRange.end.toISOString()}`;
         }
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            category: selectedCategory,
+            location: selectedLocation,
+            orderStatus: orderStatus,
+            orderPaymentStatus: orderPaymentStatus,
+            salesPerson: salesPerson,
+          }),
+        });
         const result = await response.json();
 
         setData(result.data); // Use the data array
@@ -50,7 +68,16 @@ export default function Home({ params }: { params: any }) {
         setLoading(false);
       }
     },
-    [name, date, dateRange] // Make sure to include dateRange in the dependency array
+    [
+      name,
+      date,
+      dateRange,
+      selectedCategory,
+      selectedLocation,
+      orderStatus,
+      orderPaymentStatus,
+      salesPerson,
+    ] // Make sure to include dateRange in the dependency array
   );
 
   useEffect(() => {
@@ -109,7 +136,19 @@ export default function Home({ params }: { params: any }) {
         downloadUrl += `&start=${dateRange.start.toISOString()}&end=${dateRange.end.toISOString()}`;
       }
 
-      const response = await fetch(downloadUrl);
+      const response = await fetch(downloadUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          category: selectedCategory,
+          location: selectedLocation,
+          orderStatus: orderStatus,
+          orderPaymentStatus: orderPaymentStatus,
+          salesPerson: salesPerson,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch data for download");
@@ -127,7 +166,16 @@ export default function Home({ params }: { params: any }) {
     } finally {
       setDownloading(false);
     }
-  }, [name, date, dateRange]);
+  }, [
+    name,
+    date,
+    dateRange,
+    selectedCategory,
+    selectedLocation,
+    orderStatus,
+    orderPaymentStatus,
+    salesPerson,
+  ]);
 
   return (
     <div className="p-6 max-h-[calc(100vh-56px)] overflow-y-scroll w-full">
@@ -157,70 +205,216 @@ export default function Home({ params }: { params: any }) {
             </button>
           </div>
         </div>
-        <div className="flex items-end justify-between gap-x-6 py-2">
-          <div className="flex items-center gap-x-4">
-            <Select defaultValue="all" onValueChange={setdate} value={date}>
-              <SelectTrigger className="w-[250px]">
-                {date !== "" ? date : "Select a date range"}
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="year">Current year</SelectItem>
-                <SelectItem value="quarter">Current quarter</SelectItem>
-                <SelectItem value="month">Current month</SelectItem>
-                <SelectItem value="week">Current week</SelectItem>
-                <SelectItem value="custom">Custom date</SelectItem>
-              </SelectContent>
-            </Select>
-            {date === "custom" && (
-              <>
-                <div className="flex gap-x-4">
-                  <Input
-                    type="date"
-                    min="2020-01-01"
-                    max={new Date().toISOString().split("T")[0]} // Max is the current date
-                    onChange={(e) =>
-                      setdateRange((prev) => ({
-                        ...prev,
-                        start: e.target.value ? new Date(e.target.value) : null,
-                      }))
-                    }
-                    name="startDate"
-                    className="max-w-max"
-                  />
-                  <Input
-                    type="date"
-                    min="2020-01-01"
-                    max={new Date().toISOString().split("T")[0]} // Max is the current date
-                    onChange={(e) =>
-                      setdateRange((prev) => ({
-                        ...prev,
-                        end: e.target.value ? new Date(e.target.value) : null,
-                      }))
-                    }
-                    name="endDate"
-                    className="max-w-max"
-                  />
-                </div>
-              </>
+        <div className="flex flex-col space-y-4 gap-x-6 py-2">
+          <div className="flex items-center justify-between flex-wrap gap-y-2">
+            <div className="flex items-center flex-wrap gap-2 w-full">
+              <Select defaultValue="all" onValueChange={setdate} value={date}>
+                <SelectTrigger className="w-[160px]">
+                  {date !== "" ? date : "Select a date range"}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="year">Current year</SelectItem>
+                  <SelectItem value="quarter">Current quarter</SelectItem>
+                  <SelectItem value="month">Current month</SelectItem>
+                  <SelectItem value="week">Current week</SelectItem>
+                  <SelectItem value="custom">Custom date</SelectItem>
+                </SelectContent>
+              </Select>
+              {date === "custom" && (
+                <>
+                  <div className="flex gap-x-4">
+                    <Input
+                      type="date"
+                      min="2020-01-01"
+                      max={new Date().toISOString().split("T")[0]} // Max is the current date
+                      onChange={(e) =>
+                        setdateRange((prev) => ({
+                          ...prev,
+                          start: e.target.value
+                            ? new Date(e.target.value)
+                            : null,
+                        }))
+                      }
+                      name="startDate"
+                      className="max-w-max"
+                    />
+                    <Input
+                      type="date"
+                      min="2020-01-01"
+                      max={new Date().toISOString().split("T")[0]} // Max is the current date
+                      onChange={(e) =>
+                        setdateRange((prev) => ({
+                          ...prev,
+                          end: e.target.value ? new Date(e.target.value) : null,
+                        }))
+                      }
+                      name="endDate"
+                      className="max-w-max"
+                    />
+                  </div>
+                </>
+              )}
+              <Select
+                value={selectedCategory}
+                onValueChange={(value) => setSelectedCategory(value)}
+              >
+                <SelectTrigger className="h-full bg-white max-w-max">
+                  {selectedCategory || "Select Category"}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NUBRAS GENTS KANDORA SECTION">
+                    NUBRAS GENTS KANDORA SECTION
+                  </SelectItem>
+                  <SelectItem value="NUBRAS JUNIOR KID'S SECTION">
+                    NUBRAS JUNIOR KID&apos;S SECTION
+                  </SelectItem>
+                  <SelectItem value="NUBRAS GENTS ITEM'S SECTION">
+                    NUBRAS GENTS ITEM&apos;S SECTION
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={selectedLocation}
+                onValueChange={(value) => setSelectedLocation(value)}
+              >
+                <SelectTrigger className="h-full bg-white max-w-max">
+                  {selectedLocation || "select a location"}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ABU DHABI">ABU DHABI</SelectItem>
+                  <SelectItem value="PICKUP BY SHOP">PICKUP BY SHOP</SelectItem>
+                  <SelectItem value="SHARJAH">SHARJAH</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={salesPerson}
+                onValueChange={(value) => setsalesPerson(value)}
+              >
+                <SelectTrigger className="h-full bg-white max-w-max">
+                  {salesPerson || "Select sales person"}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ADEEL">ADEEL</SelectItem>
+                  <SelectItem value="EHSAN">EHSAN</SelectItem>
+                  <SelectItem value="AZAD">AZAD</SelectItem>
+                  <SelectItem value="M EHSAN">M EHSAN</SelectItem>
+                  <SelectItem value="NASR">NASR</SelectItem>
+                  <SelectItem value="MOHMOUD">MOHMOUD</SelectItem>
+                  <SelectItem value="NAUSHAD">NAUSHAD</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={orderStatus}
+                onValueChange={(value) => setOrderStatus(value)}
+              >
+                <SelectTrigger className="h-full bg-white max-w-max">
+                  {orderStatus || "Select order status"}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PENDING">PENDING</SelectItem>
+                  <SelectItem value="DELIVERED">DELIVERED</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={orderPaymentStatus}
+                onValueChange={(value) => setorderPaymentStatus(value)}
+              >
+                <SelectTrigger className="h-full bg-white max-w-max">
+                  {orderPaymentStatus || "Select order payment status"}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NO PAYMENT">NO PAYMENT</SelectItem>
+                  <SelectItem value="PARTIAL PAYMENT">ADVANCE PAID</SelectItem>
+                  <SelectItem value="FULL PAYMENT">FULL PAID</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex justify-end w-full">
+              <Button
+                onClick={DownloadData}
+                className="bg-teal-500 hover:bg-teal-600 float-right"
+              >
+                {Downloading ? (
+                  <>
+                    <Loader2 className="animate-spin h-4 w-4" />
+                    Exporting data
+                  </>
+                ) : (
+                  <>Export to Excel</>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 border-t pt-2 flex-wrap">
+            {date && (
+              <Button
+                onClick={() => setdate("")}
+                size={"sm"}
+                variant={"outline"}
+                className="flex items-center gap-x-2 bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100"
+              >
+                Selected period: {date} <X />
+              </Button>
+            )}
+            {selectedCategory && (
+              <Button
+                onClick={() => setSelectedCategory("")}
+                size={"sm"}
+                variant={"outline"}
+                className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100"
+              >
+                Category filter: {selectedCategory} <X />
+              </Button>
+            )}
+            {selectedLocation && (
+              <Button
+                onClick={() => setSelectedLocation("")}
+                size={"sm"}
+                variant={"outline"}
+                className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100"
+              >
+                Location filter: {selectedLocation} <X />
+              </Button>
+            )}
+            {salesPerson && (
+              <Button
+                onClick={() => setsalesPerson("")}
+                size={"sm"}
+                variant={"outline"}
+                className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100"
+              >
+                Sales person filter: {salesPerson} <X />
+              </Button>
+            )}
+            {orderStatus && (
+              <Button
+                onClick={() => setOrderStatus("")}
+                size={"sm"}
+                variant={"outline"}
+                className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100"
+              >
+                Order status filter: {orderStatus} <X />
+              </Button>
+            )}
+            {orderPaymentStatus && (
+              <Button
+                onClick={() => setorderPaymentStatus("")}
+                size={"sm"}
+                variant={"outline"}
+                className="flex items-center gap-x-2  bg-teal-500 hover:bg-teal-600 hover:text-zinc-100 text-zinc-100"
+              >
+                Order payment status filter: {orderPaymentStatus} <X />
+              </Button>
             )}
           </div>
           {/* Excel Export Button */}
-          <div className="mt-4">
-            <button
-              onClick={DownloadData}
-              className="px-6 py-2 min-w-32 flex gap-x-1 items-center justify-center bg-green-500 text-white rounded"
-            >
-              {Downloading ? (
-                <>
-                  <Loader2 className="animate-spin h-4 w-4" />
-                  Exporting data
-                </>
-              ) : (
-                <>Export to Excel</>
-              )}
-            </button>
-          </div>
         </div>
 
         {/* Table Wrapper */}
