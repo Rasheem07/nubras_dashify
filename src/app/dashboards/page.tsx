@@ -230,203 +230,203 @@ export default function Dashboard() {
     selectedCategory,
   ]);
 
-  useEffect(() => {
-    const fetchChartData = async () => {
-      if (
-        (selectedPeriod === "custom" && (!startDate || !endDate)) ||
-        (selectedPeriod !== "custom" && !month && !quarter && !half)
-      ) {
-        return;
-      }
+  // useEffect(() => {
+  //   const fetchChartData = async () => {
+  //     if (
+  //       (selectedPeriod === "custom" && (!startDate || !endDate)) ||
+  //       (selectedPeriod !== "custom" && !month && !quarter && !half)
+  //     ) {
+  //       return;
+  //     }
 
-      try {
-        const response = await fetch(
-          "/api/dashboard/comparisons/sales/person",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              type: selectedPeriod,
-              month,
-              quarter,
-              half,
-              startDate,
-              endDate,
-              location: selectedLocation,
-              orderStatus,
-              orderPaymentStatus,
-            }),
-          }
-        );
-        const result = await response.json();
-        setpersonData(result);
-      } catch (error) {
-        console.error("Error fetching chart data:", error);
-      }
-    };
+  //     try {
+  //       const response = await fetch(
+  //         "/api/dashboard/comparisons/sales/person",
+  //         {
+  //           method: "POST",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify({
+  //             type: selectedPeriod,
+  //             month,
+  //             quarter,
+  //             half,
+  //             startDate,
+  //             endDate,
+  //             location: selectedLocation,
+  //             orderStatus,
+  //             orderPaymentStatus,
+  //           }),
+  //         }
+  //       );
+  //       const result = await response.json();
+  //       setpersonData(result);
+  //     } catch (error) {
+  //       console.error("Error fetching chart data:", error);
+  //     }
+  //   };
 
-    fetchChartData();
-  }, [
-    startDate,
-    endDate,
-    selectedPeriod,
-    month,
-    quarter,
-    half,
-    selectedLocation,
-    salesPerson,
-    orderStatus,
-    orderPaymentStatus,
-  ]);
-
-  // Fetch category data based on selected period and category
-  useEffect(() => {
-    const fetchCategoryData = async () => {
-      if (
-        (selectedPeriod === "custom" && (!startDate || !endDate)) ||
-        (selectedPeriod !== "custom" && !month && !quarter && !half)
-      ) {
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          "/api/dashboard/comparisons/sales/category",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              type: selectedPeriod,
-              month,
-              quarter,
-              half,
-              startDate,
-              endDate,
-              category: selectedCategory,
-              location,
-              salesPerson,
-              orderStatus,
-              orderPaymentStatus,
-            }),
-          }
-        );
-        const result = await response.json();
-        setCategoryData(result);
-      } catch (error) {
-        console.error("Error fetching category data:", error);
-      }
-    };
-
-    fetchCategoryData();
-  }, [
-    startDate,
-    endDate,
-    selectedPeriod,
-    month,
-    quarter,
-    half,
-    selectedCategory,
-    salesPerson,
-    orderStatus,
-    orderPaymentStatus,
-  ]);
+  //   fetchChartData();
+  // }, [
+  //   startDate,
+  //   endDate,
+  //   selectedPeriod,
+  //   month,
+  //   quarter,
+  //   half,
+  //   selectedLocation,
+  //   salesPerson,
+  //   orderStatus,
+  //   orderPaymentStatus,
+  // ]);
 
   // Fetch category data based on selected period and category
-  useEffect(() => {
-    const fetchCategoryProductsData = async () => {
-      if (
-        (selectedPeriod === "custom" && (!startDate || !endDate)) ||
-        (selectedPeriod !== "custom" && !month && !quarter && !half)
-      ) {
-        return;
-      }
+  // useEffect(() => {
+  //   const fetchCategoryData = async () => {
+  //     if (
+  //       (selectedPeriod === "custom" && (!startDate || !endDate)) ||
+  //       (selectedPeriod !== "custom" && !month && !quarter && !half)
+  //     ) {
+  //       return;
+  //     }
 
-      try {
-        const response = await fetch(
-          "/api/dashboard/comparisons/sales/products",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              type: selectedPeriod,
-              month,
-              quarter,
-              half,
-              startDate,
-              endDate,
-              category: selectedCategory,
-              location,
-              salesPerson,
-              orderStatus,
-              orderPaymentStatus,
-            }),
-          }
-        );
-        const result = await response.json();
-        setproductsData(result);
-      } catch (error) {
-        console.error("Error fetching category data:", error);
-      }
-    };
+  //     try {
+  //       const response = await fetch(
+  //         "/api/dashboard/comparisons/sales/category",
+  //         {
+  //           method: "POST",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify({
+  //             type: selectedPeriod,
+  //             month,
+  //             quarter,
+  //             half,
+  //             startDate,
+  //             endDate,
+  //             category: selectedCategory,
+  //             location,
+  //             salesPerson,
+  //             orderStatus,
+  //             orderPaymentStatus,
+  //           }),
+  //         }
+  //       );
+  //       const result = await response.json();
+  //       setCategoryData(result);
+  //     } catch (error) {
+  //       console.error("Error fetching category data:", error);
+  //     }
+  //   };
 
-    fetchCategoryProductsData();
-  }, [
-    startDate,
-    endDate,
-    selectedPeriod,
-    month,
-    quarter,
-    half,
-    selectedCategory,
-    salesPerson,
-    orderStatus,
-    orderPaymentStatus,
-  ]);
+  //   fetchCategoryData();
+  // }, [
+  //   startDate,
+  //   endDate,
+  //   selectedPeriod,
+  //   month,
+  //   quarter,
+  //   half,
+  //   selectedCategory,
+  //   salesPerson,
+  //   orderStatus,
+  //   orderPaymentStatus,
+  // ]);
+
+  // // Fetch category data based on selected period and category
+  // useEffect(() => {
+  //   const fetchCategoryProductsData = async () => {
+  //     if (
+  //       (selectedPeriod === "custom" && (!startDate || !endDate)) ||
+  //       (selectedPeriod !== "custom" && !month && !quarter && !half)
+  //     ) {
+  //       return;
+  //     }
+
+  //     try {
+  //       const response = await fetch(
+  //         "/api/dashboard/comparisons/sales/products",
+  //         {
+  //           method: "POST",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify({
+  //             type: selectedPeriod,
+  //             month,
+  //             quarter,
+  //             half,
+  //             startDate,
+  //             endDate,
+  //             category: selectedCategory,
+  //             location,
+  //             salesPerson,
+  //             orderStatus,
+  //             orderPaymentStatus,
+  //           }),
+  //         }
+  //       );
+  //       const result = await response.json();
+  //       setproductsData(result);
+  //     } catch (error) {
+  //       console.error("Error fetching category data:", error);
+  //     }
+  //   };
+
+  //   fetchCategoryProductsData();
+  // }, [
+  //   startDate,
+  //   endDate,
+  //   selectedPeriod,
+  //   month,
+  //   quarter,
+  //   half,
+  //   selectedCategory,
+  //   salesPerson,
+  //   orderStatus,
+  //   orderPaymentStatus,
+  // ]);
 
   // Fetch location data based on selected period and location
-  useEffect(() => {
-    const fetchLocationData = async () => {
-      if (
-        (selectedPeriod === "custom" && (!startDate || !endDate)) ||
-        (selectedPeriod !== "custom" && !month && !quarter && !half)
-      ) {
-        return;
-      }
+  // useEffect(() => {
+  //   const fetchLocationData = async () => {
+  //     if (
+  //       (selectedPeriod === "custom" && (!startDate || !endDate)) ||
+  //       (selectedPeriod !== "custom" && !month && !quarter && !half)
+  //     ) {
+  //       return;
+  //     }
 
-      try {
-        const response = await fetch(
-          "/api/dashboard/comparisons/saleslocation",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              type: selectedPeriod,
-              month,
-              quarter,
-              half,
-              startDate,
-              endDate,
-              location: selectedLocation,
-            }),
-          }
-        );
-        const result = await response.json();
-        setLocationData(result);
-      } catch (error) {
-        console.error("Error fetching location data:", error);
-      }
-    };
+  //     try {
+  //       const response = await fetch(
+  //         "/api/dashboard/comparisons/saleslocation",
+  //         {
+  //           method: "POST",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify({
+  //             type: selectedPeriod,
+  //             month,
+  //             quarter,
+  //             half,
+  //             startDate,
+  //             endDate,
+  //             location: selectedLocation,
+  //           }),
+  //         }
+  //       );
+  //       const result = await response.json();
+  //       setLocationData(result);
+  //     } catch (error) {
+  //       console.error("Error fetching location data:", error);
+  //     }
+  //   };
 
-    fetchLocationData();
-  }, [
-    startDate,
-    endDate,
-    selectedPeriod,
-    month,
-    quarter,
-    half,
-    selectedLocation,
-  ]);
+  //   fetchLocationData();
+  // }, [
+  //   startDate,
+  //   endDate,
+  //   selectedPeriod,
+  //   month,
+  //   quarter,
+  //   half,
+  //   selectedLocation,
+  // ]);
 
   const selectedType = () => {
     if (type == "month") {
@@ -1010,7 +1010,7 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-          <SalesTable data={RangeData} />
+          {/* <SalesTable data={RangeData} /> */}
         </div>
       )}
 
@@ -1281,7 +1281,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <SalesTable data={chartData} />
+            {/* <SalesTable data={chartData} /> */}
 
             
           </div>
@@ -1290,17 +1290,7 @@ export default function Dashboard() {
 
       {tab === "map" && (
 
-            <Card className="m-4">
-              <CardHeader>
-                <CardTitle>Sales Data</CardTitle>
-                <CardDescription>
-                  Sales data for selected period
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
                 <SalesLocationChart />
-              </CardContent>
-            </Card>
       )}
     </div>
   );

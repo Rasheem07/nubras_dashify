@@ -4,19 +4,36 @@ export async function POST(): Promise<Response> {
   try {
     const pg = await client.connect();  // Connect to the database
 
-    // Define the SQL query
+    // Define the SQL query with CTEs
     const query = `
+      WITH yearly_sales AS (
+        SELECT 
+          EXTRACT(YEAR FROM "SALE ORDER DATE") AS "YEAR", 
+          "CUSTOMER LOCATION", 
+          SUM("TOTAL AMOUNT") AS "TOTAL AMOUNT"
+        FROM 
+          nubras_database_final1
+        GROUP BY 
+          EXTRACT(YEAR FROM "SALE ORDER DATE"), "CUSTOMER LOCATION"
+      ),
+      yearly_average AS (
+        SELECT 
+          "YEAR", 
+          AVG("TOTAL AMOUNT") AS "AVERAGE AMOUNT"
+        FROM yearly_sales
+        GROUP BY "YEAR"
+      )
       SELECT 
-        EXTRACT(YEAR FROM "SALE ORDER DATE") AS "YEAR", 
-        "CUSTOMER LOCATION", 
-        SUM("TOTAL AMOUNT") AS "TOTAL AMOUNT", 
-        AVG(SUM("TOTAL AMOUNT")) OVER (PARTITION BY "CUSTOMER LOCATION") AS "AVERAGE AMOUNT"
+        ys."YEAR", 
+        ys."CUSTOMER LOCATION", 
+        ys."TOTAL AMOUNT", 
+        ya."AVERAGE AMOUNT"
       FROM 
-        nubras_database_final1
-      GROUP BY 
-        EXTRACT(YEAR FROM "SALE ORDER DATE"), "CUSTOMER LOCATION"
+        yearly_sales ys
+      JOIN 
+        yearly_average ya ON ys."YEAR" = ya."YEAR"
       ORDER BY 
-        "YEAR", "CUSTOMER LOCATION";
+        ys."YEAR", ys."CUSTOMER LOCATION";
     `;
 
     // Execute the query
@@ -25,6 +42,7 @@ export async function POST(): Promise<Response> {
     // Release the client back to the pool
     pg.release();
 
+    // Group the results into a structured format
     const groupedData = result.rows.reduce((acc, row) => {
       const year = row['YEAR'];
       if (year) {

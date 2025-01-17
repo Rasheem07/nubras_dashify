@@ -33,11 +33,11 @@ const Table = ({ data }: { data: DataRow[] }) => {
     >
       <thead className="bg-gray-300">
         {headerGroups.map((headerGroup) => (
-          <tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id}>
+          <tr {...headerGroup.getHeaderGroupProps()} key={Math.floor(Math.random() * 9999)}>
             {headerGroup.headers.map((column) => (
               <th
                 {...column.getHeaderProps()}
-                key={column.id}
+                key={Math.floor(Math.random() * 9999)}
                 className="px-6 py-3 text-center text-sm font-semibold bg-gray-200"
                 style={{
                   borderBottom: "1px solid #ddd",
@@ -56,13 +56,13 @@ const Table = ({ data }: { data: DataRow[] }) => {
           return (
             <tr
               {...row.getRowProps()}
-              key={row.id}
+              key={Math.floor(Math.random() * 9999)}
               className={`hover:bg-gray-50 ${rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
             >
               {row.cells.map((cell) => (
                 <td
                   {...cell.getCellProps()}
-                  key={cell.column.id}
+                  key={Math.floor(Math.random() * 9999)}
                   className="px-6 py-3 text-sm text-center text-gray-600"
                   style={{
                     borderBottom: "1px solid #ddd",
