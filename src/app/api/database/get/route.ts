@@ -37,48 +37,48 @@ export async function POST(req: NextRequest) {
     const startYear = startOfYear(new Date());
     const endYear = endOfYear(new Date());
     if (!whereClauseAdded) {
-      query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
-      countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      query += ' WHERE "sale_order_date" BETWEEN $1::date AND $2::date';
+      countQuery += ' WHERE "sale_order_date" BETWEEN $1::date AND $2::date';
       whereClauseAdded = true;
     } else {
-      query += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
-      countQuery += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      query += ' AND "sale_order_date" BETWEEN $1::date AND $2::date';
+      countQuery += ' AND "sale_order_date" BETWEEN $1::date AND $2::date';
     }
     params.push(startYear, endYear);
   } else if (date === "month") {
     const startMonth = startOfMonth(new Date());
     const endMonth = endOfMonth(new Date());
     if (!whereClauseAdded) {
-      query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
-      countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      query += ' WHERE "sale_order_date" BETWEEN $1::date AND $2::date';
+      countQuery += ' WHERE "sale_order_date" BETWEEN $1::date AND $2::date';
       whereClauseAdded = true;
     } else {
-      query += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
-      countQuery += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      query += ' AND "sale_order_date" BETWEEN $1::date AND $2::date';
+      countQuery += ' AND "sale_order_date" BETWEEN $1::date AND $2::date';
     }
     params.push(startMonth, endMonth);
   } else if (date === "quarter") {
     const startQuarter = startOfQuarter(new Date());
     const endQuarter = endOfQuarter(new Date());
     if (!whereClauseAdded) {
-      query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
-      countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      query += ' WHERE "sale_order_date" BETWEEN $1::date AND $2::date';
+      countQuery += ' WHERE "sale_order_date" BETWEEN $1::date AND $2::date';
       whereClauseAdded = true;
     } else {
-      query += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
-      countQuery += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      query += ' AND "sale_order_date" BETWEEN $1::date AND $2::date';
+      countQuery += ' AND "sale_order_date" BETWEEN $1::date AND $2::date';
     }
     params.push(startQuarter, endQuarter);
   } else if (date === "week") {
     const startWeekDate = startOfWeek(new Date(), { weekStartsOn: 0 });
     const endWeekDate = endOfWeek(new Date(), { weekStartsOn: 0 });
     if (!whereClauseAdded) {
-      query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
-      countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      query += ' WHERE "sale_order_date" BETWEEN $1::date AND $2::date';
+      countQuery += ' WHERE "sale_order_date" BETWEEN $1::date AND $2::date';
       whereClauseAdded = true;
     } else {
-      query += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
-      countQuery += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      query += ' AND "sale_order_date" BETWEEN $1::date AND $2::date';
+      countQuery += ' AND "sale_order_date" BETWEEN $1::date AND $2::date';
     }
     params.push(startWeekDate, endWeekDate);
   } else if (date === "custom" && start && end) {
@@ -93,12 +93,12 @@ export async function POST(req: NextRequest) {
     }
 
     if (!whereClauseAdded) {
-      query += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
-      countQuery += ' WHERE "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      query += ' WHERE "sale_order_date" BETWEEN $1::date AND $2::date';
+      countQuery += ' WHERE "sale_order_date" BETWEEN $1::date AND $2::date';
       whereClauseAdded = true;
     } else {
-      query += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
-      countQuery += ' AND "SALE ORDER DATE" BETWEEN $1::date AND $2::date';
+      query += ' AND "sale_order_date" BETWEEN $1::date AND $2::date';
+      countQuery += ' AND "sale_order_date" BETWEEN $1::date AND $2::date';
     }
     params.push(startDate, endDate);
   }
@@ -106,66 +106,66 @@ export async function POST(req: NextRequest) {
   // Apply filters for location, salesPerson, orderStatus, orderPaymentStatus, and category
   if (location && location !== "") {
     if (!whereClauseAdded) {
-      query += ` WHERE "CUSTOMER LOCATION" = $${params.length + 1}`;
-      countQuery += ` WHERE "CUSTOMER LOCATION" = $${params.length + 1}`;
+      query += ` WHERE "customer_location" = $${params.length + 1}`;
+      countQuery += ` WHERE "customer_location" = $${params.length + 1}`;
       whereClauseAdded = true;
     } else {
-      query += ` AND "CUSTOMER LOCATION" = $${params.length + 1}`;
-      countQuery += ` AND "CUSTOMER LOCATION" = $${params.length + 1}`;
+      query += ` AND "customer_location" = $${params.length + 1}`;
+      countQuery += ` AND "customer_location" = $${params.length + 1}`;
     }
     params.push(location);
   }
   
   if (salesPerson && salesPerson !== "") {
     if (!whereClauseAdded) {
-      query += ` WHERE "SALES PERSON" = $${params.length + 1}`;
-      countQuery += ` WHERE "SALES PERSON" = $${params.length + 1}`;
+      query += ` WHERE "sales_person" = $${params.length + 1}`;
+      countQuery += ` WHERE "sales_person" = $${params.length + 1}`;
       whereClauseAdded = true;
     } else {
-      query += ` AND "SALES PERSON" = $${params.length + 1}`;
-      countQuery += ` AND "SALES PERSON" = $${params.length + 1}`;
+      query += ` AND "sales_person" = $${params.length + 1}`;
+      countQuery += ` AND "sales_person" = $${params.length + 1}`;
     }
     params.push(salesPerson);
   }
   
   if (orderStatus && orderStatus !== "") {
     if (!whereClauseAdded) {
-      query += ` WHERE "ORDER STATUS" = $${params.length + 1}`;
-      countQuery += ` WHERE "ORDER STATUS" = $${params.length + 1}`;
+      query += ` WHERE "order__status" = $${params.length + 1}`;
+      countQuery += ` WHERE "order__status" = $${params.length + 1}`;
       whereClauseAdded = true;
     } else {
-      query += ` AND "ORDER STATUS" = $${params.length + 1}`;
-      countQuery += ` AND "ORDER STATUS" = $${params.length + 1}`;
+      query += ` AND "order__status" = $${params.length + 1}`;
+      countQuery += ` AND "order__status" = $${params.length + 1}`;
     }
     params.push(orderStatus);
   }
   
   if (orderPaymentStatus && orderPaymentStatus !== "") {
     if (!whereClauseAdded) {
-      query += ` WHERE "ORDER PAYMENT STATUS" = $${params.length + 1}`;
-      countQuery += ` WHERE "ORDER PAYMENT STATUS" = $${params.length + 1}`;
+      query += ` WHERE "order_payment_status" = $${params.length + 1}`;
+      countQuery += ` WHERE "order_payment_status" = $${params.length + 1}`;
       whereClauseAdded = true;
     } else {
-      query += ` AND "ORDER PAYMENT STATUS" = $${params.length + 1}`;
-      countQuery += ` AND "ORDER PAYMENT STATUS" = $${params.length + 1}`;
+      query += ` AND "order_payment_status" = $${params.length + 1}`;
+      countQuery += ` AND "order_payment_status" = $${params.length + 1}`;
     }
     params.push(orderPaymentStatus);
   }
   
   if (category && category !== "") {
     if (!whereClauseAdded) {
-      query += ` WHERE "category" = $${params.length + 1}`;
-      countQuery += ` WHERE "category" = $${params.length + 1}`;
+      query += ` WHERE "nubras_gents_item_s_section" = $${params.length + 1}`;
+      countQuery += ` WHERE "nubras_gents_item_s_section" = $${params.length + 1}`;
       whereClauseAdded = true;
     } else {
-      query += ` AND "category" = $${params.length + 1}`;
-      countQuery += ` AND "category" = $${params.length + 1}`;
+      query += ` AND "nubras_gents_item_s_section" = $${params.length + 1}`;
+      countQuery += ` AND "nubras_gents_item_s_section" = $${params.length + 1}`;
     }
     params.push(category);
   }
   
   // Add LIMIT and OFFSET at the end of the query for pagination
-  query += ` ORDER BY id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+  query += ` ORDER BY "sale_order_date" LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
   params.push(pageSize, offset);
 
   console.log(query)

@@ -26,6 +26,7 @@ import {
   MessageCircleWarningIcon,
   AreaChartIcon,
   Share,
+  PlusCircle,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -65,6 +66,7 @@ import SalesAreaChart from "./_components/AreaChart";
 import Chart from "./_components/chart";
 import { ShareButtonWithModal } from "./_components/ShareButton";
 import SalesLocationChart from "./_components/SalesLocationChart";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function Dashboard() {
   const [tab, setTab] = useState("dashboard");
@@ -996,6 +998,18 @@ export default function Dashboard() {
               </Button>
             )}
           </div>
+          <div className="flex items-center justify-end">
+
+          <Dialog>
+            <DialogTrigger className="flex items-center py-1.5 px-4 rounded-md shadow-lg text-white gap-x-1 bg-teal-500 hover:bg-teal-600">Add to reports <PlusCircle className="h-4 w-4"/></DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Select a collection</DialogTitle>
+                <DialogDescription>Select a collection where your report is or want to create new one</DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+          </div>
           <Card>
             <CardHeader>
               <CardTitle>Sales Data according to selected date range</CardTitle>
@@ -1010,7 +1024,7 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-          {/* <SalesTable data={RangeData} /> */}
+          <SalesTable data={RangeData} />
         </div>
       )}
 
@@ -1281,17 +1295,12 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* <SalesTable data={chartData} /> */}
-
-            
+            <SalesTable data={chartData} />
           </div>
         </div>
       )}
 
-      {tab === "map" && (
-
-                <SalesLocationChart />
-      )}
+      {tab === "map" && <SalesLocationChart />}
     </div>
   );
 }
