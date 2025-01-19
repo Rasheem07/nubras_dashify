@@ -17,13 +17,11 @@ export async function POST(req: NextRequest) {
     // Insert summaries
     if (summaries && summaries.length > 0) {
       for (const summary of summaries) {
-        if (!summary.type || !summary.column) {
-          throw new Error("Both type and column are required for each summary");
-        }
+       
 
         await client.query(
           "INSERT INTO summaries (question_id, summary_type, column_name) VALUES ($1, $2, $3)",
-          [questionId, summary.type, summary.column]
+          [questionId, summary.type, summary.column || null]
         );
       }
     }

@@ -168,7 +168,7 @@ export async function POST(req: NextRequest) {
     // Format result to replace "to_char" with "date"
     const formattedResult = queryResult.rows.map(row => ({
       ...row,
-      sales_order_date: row.to_char, // Rename "to_char" to "date"
+      sale_order_date: row.to_char, // Rename "to_char" to "date"
       to_char: undefined, // Remove original "to_char" key
     }));
 

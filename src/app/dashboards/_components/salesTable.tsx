@@ -91,7 +91,7 @@ const SalesTable = ({ data, className }: { data: any[]; className?: string }) =>
   };
 
   return (
-    <div className={cn("max-h-[250px]", className)}>
+    <div className={cn("", className)}>
       <Card className="shadow-sm border border-gray-200 min-h-[365px] rounded-lg overflow-hidden">
         <CardHeader className="p-4 flex flex-row justify-between items-center">
           <div>
