@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation"; // Import useSearchParams from Next.js
 import SalesTable from "@/app/dashboards/_components/salesTable";
 import salesData from "./_data/monthlyData";
 import quarterlySalesData from "./_data/quarterlySalesData";
@@ -13,14 +13,15 @@ import YearlySalesChart from "./_components/yearlyChart";
 import Image from "next/image";
 
 export default function Dashboard() {
-  // Filter states
-  const [yearSelected, setYearSelected] = useState<string | null>(null);
-  const [monthSelected, setMonthSelected] = useState<string | null>(null);
-  const [quarterSelected, setQuarterSelected] = useState<string | null>(null);
-  const [halfYearSelected, setHalfYearSelected] = useState<string | null>(null);
+  const searchParams = useSearchParams(); // Get the search params from URL
+  const [yearSelected, setYearSelected] = useState<string | null>(searchParams.get("year"));
+  const [monthSelected, setMonthSelected] = useState<string | null>(searchParams.get("month"));
+  const [quarterSelected, setQuarterSelected] = useState<string | null>(searchParams.get("quarter"));
+  const [halfYearSelected, setHalfYearSelected] = useState<string | null>(searchParams.get("halfYear"));
 
   // Data filtering function
   const filterData = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any[],
     yearSelected: string | null,
     monthSelected: string | null,
@@ -61,19 +62,36 @@ export default function Dashboard() {
       return isValid;
     });
   };
-  
+
   // Handle change for dropdown filters
-  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => setYearSelected(e.target.value);
-  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedMonth = e.target.value;
-    if (selectedMonth) {
-      setMonthSelected(selectedMonth);
-    } else {
-      setMonthSelected(null);
+  const handleFilterChange = (filter: string, value: string | null) => {
+    // Update the selected filter state
+    switch (filter) {
+      case "year":
+        setYearSelected(value);
+        break;
+      case "month":
+        setMonthSelected(value);
+        break;
+      case "quarter":
+        setQuarterSelected(value);
+        break;
+      case "halfYear":
+        setHalfYearSelected(value);
+        break;
     }
   };
-  const handleQuarterChange = (e: React.ChangeEvent<HTMLSelectElement>) => setQuarterSelected(e.target.value);
-  const handleHalfYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => setHalfYearSelected(e.target.value);
+
+  // Update the URL with the new search params
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (yearSelected) params.set("year", yearSelected);
+    if (monthSelected) params.set("month", monthSelected);
+    if (quarterSelected) params.set("quarter", quarterSelected);
+    if (halfYearSelected) params.set("halfYear", halfYearSelected);
+    
+    window.history.replaceState({}, "", "?" + params.toString());
+  }, [yearSelected, monthSelected, quarterSelected, halfYearSelected]);
 
   // Get unique options for dropdowns (you can extract these dynamically from your data)
   const yearOptions = ["2025", "2024", "2023", "2022", "2021", "2020"];
@@ -103,7 +121,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="flex space-x-4 justify-center my-4">
-          <select onChange={handleYearChange} className="px-4 py-2 border rounded">
+          <select value={yearSelected || ''} onChange={(e) => handleFilterChange("year", e.target.value)} className="px-4 py-2 border rounded">
             <option value="">Select Year</option>
             {yearOptions.map((year) => (
               <option key={year} value={year}>
@@ -111,7 +129,7 @@ export default function Dashboard() {
               </option>
             ))}
           </select>
-          <select onChange={handleMonthChange} className="px-4 py-2 border rounded">
+          <select value={monthSelected || ''} onChange={(e) => handleFilterChange("month", e.target.value)} className="px-4 py-2 border rounded">
             <option value="">Select Month</option>
             {monthOptions.map((month) => (
               <option key={month} value={month}>
@@ -119,7 +137,7 @@ export default function Dashboard() {
               </option>
             ))}
           </select>
-          <select onChange={handleQuarterChange} className="px-4 py-2 border rounded">
+          <select value={quarterSelected || ''} onChange={(e) => handleFilterChange("quarter", e.target.value)} className="px-4 py-2 border rounded">
             <option value="">Select Quarter</option>
             {quarterOptions.map((quarter) => (
               <option key={quarter} value={quarter}>
@@ -127,7 +145,7 @@ export default function Dashboard() {
               </option>
             ))}
           </select>
-          <select onChange={handleHalfYearChange} className="px-4 py-2 border rounded">
+          <select value={halfYearSelected || ''} onChange={(e) => handleFilterChange("halfYear", e.target.value)} className="px-4 py-2 border rounded">
             <option value="">Select Half-Year</option>
             {halfYearOptions.map((half) => (
               <option key={half} value={half}>
@@ -141,7 +159,7 @@ export default function Dashboard() {
       <div className="p-6 mt-[150px] xl:space-y-0 gap-4 space-y-6 grid grid-cols-1 grid-flow-row 2xl:grid-cols-2">
         {/* Cards */}
         <MonthlySalesChart data={filteredMonthlyData} />
-        <SalesTable data={filteredMonthlyData} className="max-h-[520px] overflow-y-auto" />
+        <SalesTable data={filteredMonthlyData} />
         <QuarterlySalesChart data={filteredQuarterlyData} />
         <SalesTable data={filteredQuarterlyData} />
         <HalfYearlySalesChart data={filteredHalfYearlyData} />
