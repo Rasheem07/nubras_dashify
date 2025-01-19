@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation"; // Import useSearchParams from Next.js
 import SalesTable from "@/app/dashboards/_components/salesTable";
 import salesData from "./_data/monthlyData";
@@ -12,7 +12,15 @@ import HalfYearlySalesChart from "./_components/halfChart";
 import YearlySalesChart from "./_components/yearlyChart";
 import Image from "next/image";
 
-export default function Dashboard() {
+
+export default function ShareDashboard() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+          <Dashboard />
+    </Suspense>
+  )
+}
+ function Dashboard() {
   const searchParams = useSearchParams(); // Get the search params from URL
   const [yearSelected, setYearSelected] = useState<string | null>(searchParams.get("year"));
   const [monthSelected, setMonthSelected] = useState<string | null>(searchParams.get("month"));
@@ -106,6 +114,7 @@ export default function Dashboard() {
   const filteredYearlyData = filterData(yearlySalesData, yearSelected, null, quarterSelected, halfYearSelected);
 
   return (
+   
     <div className="w-full" id="container">
       <div className="bg-white z-10 p-4 pb-0 fixed top-0 w-full border-b border-gray-300">
         <div className="flex items-center justify-center w-full">

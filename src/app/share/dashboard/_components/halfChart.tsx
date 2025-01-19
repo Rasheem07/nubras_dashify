@@ -34,6 +34,7 @@ const HalfYearlySalesChart = ({data}: {data: any[]}) => {
               dataKey="saleCount"
               fill="#82ca9d"
               name="Sale Count"
+              barSize={24}
             />
             {/* Line for Total Sales */}
             <Line
