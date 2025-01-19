@@ -20,7 +20,7 @@ const QuarterlySalesChart = ({data}: {data: any[]}) => {
         <CardTitle>Quarterly Sales Data</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={500}>
+        <ResponsiveContainer width="100%" height={data.length > 4 && data.length < 8 ? 800 : data.length > 8? 2000 : 400}>
           <BarChart
             layout="vertical"
             barGap={5} // Adjust spacing between bars within a group
