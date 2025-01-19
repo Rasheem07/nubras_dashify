@@ -48,31 +48,16 @@ export default function Dashboard() {
   const filteredYearlyData = filterData(yearlySalesData, yearSelected, monthSelected, quarterSelected, halfYearSelected);
 
   // Handle change for dropdown filters
-  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setYearSelected(e.target.value);
-    setMonthSelected(null); // Reset month selection when year changes
-    setQuarterSelected(null); // Reset quarter selection when year changes
-    setHalfYearSelected(null); // Reset half-year selection when year changes
-  };
+  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => setYearSelected(e.target.value);
   const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => setMonthSelected(e.target.value);
   const handleQuarterChange = (e: React.ChangeEvent<HTMLSelectElement>) => setQuarterSelected(e.target.value);
   const handleHalfYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => setHalfYearSelected(e.target.value);
 
-  // Get unique options for dropdowns
+  // Get unique options for dropdowns (you can extract these from your data)
   const yearOptions = ["2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017"];
-  
-  // Dynamically generate months, quarters, and half years based on selected year
-  const monthOptions = yearSelected ? Array.from({ length: 12 }, (_, i) => `${new Date(yearSelected, i).toLocaleString('default', { month: 'short' })}, ${yearSelected}`) : [];
-  const quarterOptions = yearSelected ? [`${yearSelected}-Q1`, `${yearSelected}-Q2`, `${yearSelected}-Q3`, `${yearSelected}-Q4`] : [];
-  const halfYearOptions = yearSelected ? [`${yearSelected}-H1`, `${yearSelected}-H2`] : [];
-
-  // Handle removal of filters
-  const removeFilter = (filterType: string) => {
-    if (filterType === "year") setYearSelected(null);
-    if (filterType === "month") setMonthSelected(null);
-    if (filterType === "quarter") setQuarterSelected(null);
-    if (filterType === "halfYear") setHalfYearSelected(null);
-  };
+  const monthOptions = ["Jan", "Feb", "Mar", "apr"]; // Example
+  const quarterOptions = ["2019-Q1", "2019-Q2", "2020-Q1"]; // Example
+  const halfYearOptions = ["2021-H1", "2021-H2"];
 
   return (
     <div className="w-full" id="container">
@@ -100,19 +85,19 @@ export default function Dashboard() {
               <option key={year} value={year}>{year}</option>
             ))}
           </select>
-          <select onChange={handleMonthChange} disabled={!yearSelected} className="px-4 py-2 border rounded">
+          <select onChange={handleMonthChange} className="px-4 py-2 border rounded">
             <option value="">Select Month</option>
             {monthOptions.map(month => (
               <option key={month} value={month}>{month}</option>
             ))}
           </select>
-          <select onChange={handleQuarterChange} disabled={!yearSelected} className="px-4 py-2 border rounded">
+          <select onChange={handleQuarterChange} className="px-4 py-2 border rounded">
             <option value="">Select Quarter</option>
             {quarterOptions.map(quarter => (
               <option key={quarter} value={quarter}>{quarter}</option>
             ))}
           </select>
-          <select onChange={handleHalfYearChange} disabled={!yearSelected} className="px-4 py-2 border rounded">
+          <select onChange={handleHalfYearChange} className="px-4 py-2 border rounded">
             <option value="">Select Half-Year</option>
             {halfYearOptions.map(half => (
               <option key={half} value={half}>{half}</option>
@@ -129,16 +114,6 @@ export default function Dashboard() {
         <SalesTable data={filteredHalfYearlyData} />
         <YearlySalesChart data={filteredYearlyData} />
         <SalesTable data={filteredYearlyData} />
-
-        {/* Selected Filters Container */}
-        <div className="mt-6">
-          <div className="flex space-x-4">
-            {yearSelected && <div className="bg-gray-200 px-4 py-2 rounded-full">{yearSelected} <button onClick={() => removeFilter("year")} className="ml-2 text-red-600">x</button></div>}
-            {monthSelected && <div className="bg-gray-200 px-4 py-2 rounded-full">{monthSelected} <button onClick={() => removeFilter("month")} className="ml-2 text-red-600">x</button></div>}
-            {quarterSelected && <div className="bg-gray-200 px-4 py-2 rounded-full">{quarterSelected} <button onClick={() => removeFilter("quarter")} className="ml-2 text-red-600">x</button></div>}
-            {halfYearSelected && <div className="bg-gray-200 px-4 py-2 rounded-full">{halfYearSelected} <button onClick={() => removeFilter("halfYear")} className="ml-2 text-red-600">x</button></div>}
-          </div>
-        </div>
       </div>
     </div>
   );
