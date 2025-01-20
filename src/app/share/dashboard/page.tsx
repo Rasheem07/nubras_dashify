@@ -12,7 +12,6 @@ import QuarterlySalesChart from "./_components/quarterlyChart";
 import HalfYearlySalesChart from "./_components/halfChart";
 import YearlySalesChart from "./_components/yearlyChart";
 import Image from "next/image";
-import CategoryChart from "./_components/categoryChart";
 import { Pagination } from "./_components/pagination"; // New pagination component
 export default function ShareDashboard() {
   return (
