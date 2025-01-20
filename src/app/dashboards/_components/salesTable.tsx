@@ -27,61 +27,65 @@ const Table = ({ data }: { data: DataRow[] }) => {
     useTable({ columns, data });
 
   return (
-    <table
-      {...getTableProps()}
-      className="min-w-full border shadow-sm overflow-hidden max-h-[250px] overflow-y-auto"
-    >
-      <thead className="bg-gray-300">
-        {headerGroups.map((headerGroup) => (
-          <tr {...headerGroup.getHeaderGroupProps()} key={Math.floor(Math.random() * 9999)}>
-            {headerGroup.headers.map((column) => (
-              <th
-                {...column.getHeaderProps()}
-                key={Math.floor(Math.random() * 9999)}
-                className="px-6 py-3 text-center text-sm font-semibold bg-gray-200"
-                style={{
-                  borderBottom: "1px solid #ddd",
-                  backgroundColor: "#f7fafc", // Light gray background for headers
-                }}
-              >
-                {column.render("Header")}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody {...getTableBodyProps()}>
-        {rows.map((row, rowIndex) => {
-          prepareRow(row);
-          return (
-            <tr
-              {...row.getRowProps()}
-              key={Math.floor(Math.random() * 9999)}
-              className={`hover:bg-gray-50 ${rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
-            >
-              {row.cells.map((cell) => (
-                <td
-                  {...cell.getCellProps()}
-                  key={Math.floor(Math.random() * 9999)}
-                  className="px-6 py-3 text-sm text-center text-gray-600"
+    <div className="overflow-x-auto"> {/* Add horizontal scrolling here */}
+      <table
+        {...getTableProps()}
+        className="min-w-full border shadow-sm max-h-[250px]"
+      >
+        <thead className="bg-gray-300">
+          {headerGroups.map((headerGroup) => (
+            <tr {...headerGroup.getHeaderGroupProps()} key={Math.random()}>
+              {headerGroup.headers.map((column) => (
+                <th
+                  {...column.getHeaderProps()}
+                  key={Math.random()}
+                  className="px-6 py-3 text-center text-sm font-semibold bg-gray-200"
                   style={{
                     borderBottom: "1px solid #ddd",
-                    backgroundColor: "white",
+                    backgroundColor: "#f7fafc", // Light gray background for headers
                   }}
                 >
-                  {cell.render("Cell")}
-                </td>
+                  {column.render("Header")}
+                </th>
               ))}
             </tr>
-          );
-        })}
-      </tbody>
-    </table>
+          ))}
+        </thead>
+        <tbody {...getTableBodyProps()}>
+          {rows.map((row, rowIndex) => {
+            prepareRow(row);
+            return (
+              <tr
+                {...row.getRowProps()}
+                key={Math.random()}
+                className={`hover:bg-gray-50 ${
+                  rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"
+                }`}
+              >
+                {row.cells.map((cell) => (
+                  <td
+                    {...cell.getCellProps()}
+                    key={Math.random()}
+                    className="px-4 py-2 text-sm text-nowrap text-center text-gray-600"
+                    style={{
+                      borderBottom: "1px solid #ddd",
+                      backgroundColor: "white",
+                    }}
+                  >
+                    {cell.render("Cell")}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const SalesTable = ({ data, className }: { data: any[]; className?: string }) => {
+const SalesTable = ({ data, className, name="Sales Data Table", description="Sales data for the selected period" }: { data: any[]; className?: string, name?: string; description?: string}) => {
   // Export function for Excel
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(data); // Convert data to worksheet
@@ -96,8 +100,8 @@ const SalesTable = ({ data, className }: { data: any[]; className?: string }) =>
         <CardHeader className="p-4 flex flex-row justify-between items-center">
           <div>
 
-          <CardTitle className="max-w-max">Sales Data Table</CardTitle>
-          <CardDescription>Sales data for the selected period</CardDescription>
+          <CardTitle className="max-w-max">{name}</CardTitle>
+          <CardDescription>{description}</CardDescription>
           </div>
           <Button
             onClick={exportToExcel}
