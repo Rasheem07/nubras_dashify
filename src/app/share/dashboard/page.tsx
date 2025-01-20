@@ -40,7 +40,7 @@ function Dashboard() {
   const [categoryData, setCategoryData] = useState([]);
   const [categoryData2, setCategoryData2] = useState([]);
   const [categoryData3, setCategoryData3] = useState([]);
-  const [categoryData4, setCategoryData4] = useState([]);
+  // const [categoryData4, setCategoryData4] = useState([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -215,29 +215,29 @@ useEffect(() => {
     setCategoryData3(data); // Update state with fetched data
   };
   fetchData3();
-  const fetchData4 = async () => {
-    const formattedDate = selectedDate ? selectedDate : null;
+  // const fetchData4 = async () => {
+  //   const formattedDate = selectedDate ? selectedDate : null;
 
-    const response = await fetch("/api/category", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        branch: branchSelected,
-        category: "NUBRAS GENTS JACKET SECTION",
-        date: formattedDate, // Use the formatted date
-      }),
-    });
+  //   const response = await fetch("/api/category", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       branch: branchSelected,
+  //       category: "NUBRAS GENTS JACKET SECTION",
+  //       date: formattedDate, // Use the formatted date
+  //     }),
+  //   });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch data");
-    }
+  //   if (!response.ok) {
+  //     throw new Error("Failed to fetch data");
+  //   }
 
-    const data = await response.json();
-    setCategoryData4(data); // Update state with fetched data
-  };
-  fetchData4();
+  //   const data = await response.json();
+  //   setCategoryData4(data); // Update state with fetched data
+  // };
+  // fetchData4();
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [
   yearSelected,
@@ -317,7 +317,7 @@ useEffect(() => {
   const paginatedCategoryData = getPaginatedData(categoryData);
   const paginatedCategoryData2 = getPaginatedData(categoryData2);
   const paginatedCategoryData3 = getPaginatedData(categoryData3);
-  const paginatedCategoryData4 = getPaginatedData(categoryData4);
+  // const paginatedCategoryData4 = getPaginatedData(categoryData4);
 
   return (
     <div className="w-full" id="container">
@@ -416,7 +416,7 @@ useEffect(() => {
         <SalesTable name="NUBRAS GENTS ITEM'S SECTION" data={paginatedCategoryData} />
         <SalesTable name="NUBRAS JUNIOR KID'S SECTION" data={paginatedCategoryData2} />
         <SalesTable name="NUBRAS GENTS KANDORA SECTION" data={paginatedCategoryData3} />
-        <SalesTable name="NUBRAS GENTS JACKET SECTION" data={paginatedCategoryData4} />
+        {/* <SalesTable name="NUBRAS GENTS JACKET SECTION" data={paginatedCategoryData4} /> */}
         <SalesTable name="MONTHLY SALES DATA" data={filteredMonthlyData} />
         <SalesTable name="QUARTERLY SALES DATA" data={filteredQuarterlyData} />
         <SalesTable name="HALF YEARLY SALES DATA" data={filteredHalfYearlyData} />
