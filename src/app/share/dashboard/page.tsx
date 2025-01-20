@@ -421,7 +421,7 @@ useEffect(() => {
         <SalesTable name="QUARTERLY SALES DATA" data={filteredQuarterlyData} />
         <SalesTable name="HALF YEARLY SALES DATA" data={filteredHalfYearlyData} />
         <SalesTable name="YEARLY SALES DATA" data={filteredYearlyData} />
-        <CategoryChart data={paginatedCategoryData} />
+        {/* <CategoryChart data={paginatedCategoryData} /> */}
         <MonthlySalesChart data={filteredMonthlyData} />
         <QuarterlySalesChart data={filteredQuarterlyData} />
         <HalfYearlySalesChart data={filteredHalfYearlyData} />
