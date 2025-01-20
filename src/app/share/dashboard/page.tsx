@@ -410,7 +410,7 @@ useEffect(() => {
           <input
             className="max-w-max border rouned-md px-2 "
             type="text"
-            placeholder="YYYY/MM/DD"
+            placeholder="YYYY-MM-DD"
             onChange={handleDateChange}
           />
         </div>
