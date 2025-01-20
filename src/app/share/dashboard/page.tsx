@@ -129,25 +129,24 @@ function Dashboard() {
     window.history.replaceState({}, "", "?" + params.toString());
   }, [yearSelected, monthSelected, quarterSelected, halfYearSelected]);
 
-  const monthMapping: { [key: string]: string } = {
-    Jan: "01",
-    Feb: "02",
-    Mar: "03",
-    Apr: "04",
-    May: "05",
-    Jun: "06",
-    Jul: "07",
-    Aug: "08",
-    Sep: "09",
-    Oct: "10",
-    Nov: "11",
-    Dec: "12",
-  };
+  // const monthMapping: { [key: string]: string } = {
+  //   Jan: "01",
+  //   Feb: "02",
+  //   Mar: "03",
+  //   Apr: "04",
+  //   May: "05",
+  //   Jun: "06",
+  //   Jul: "07",
+  //   Aug: "08",
+  //   Sep: "09",
+  //   Oct: "10",
+  //   Nov: "11",
+  //   Dec: "12",
+  // };
 
   // Fetch data from API based on selected filters
 useEffect(() => {
   const fetchData = async () => {
-    const formattedMonth = monthSelected ? monthMapping[monthSelected] : null;
     const formattedDate = selectedDate ? selectedDate : null;
 
     const response = await fetch("/api/category", {
@@ -156,8 +155,6 @@ useEffect(() => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        year: yearSelected,
-        month: formattedMonth,
         branch: branchSelected,
         category: "NUBRAS GENTS ITEM'S SECTION",
         date: formattedDate, // Use the formatted date
@@ -173,7 +170,6 @@ useEffect(() => {
   };
   fetchData();
   const fetchData2 = async () => {
-    const formattedMonth = monthSelected ? monthMapping[monthSelected] : null;
     const formattedDate = selectedDate ? selectedDate : null;
 
     const response = await fetch("/api/category", {
@@ -182,8 +178,6 @@ useEffect(() => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        year: yearSelected,
-        month: formattedMonth,
         branch: branchSelected,
         category: "NUBRAS JUNIOR KID'S SECTION",
         date: formattedDate, // Use the formatted date
@@ -199,7 +193,6 @@ useEffect(() => {
   };
   fetchData2();
   const fetchData3 = async () => {
-    const formattedMonth = monthSelected ? monthMapping[monthSelected] : null;
     const formattedDate = selectedDate ? selectedDate : null;
 
     const response = await fetch("/api/category", {
@@ -208,8 +201,6 @@ useEffect(() => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        year: yearSelected,
-        month: formattedMonth,
         branch: branchSelected,
         category: "NUBRAS GENTS KANDORA SECTION",
         date: formattedDate, // Use the formatted date
@@ -225,7 +216,6 @@ useEffect(() => {
   };
   fetchData3();
   const fetchData4 = async () => {
-    const formattedMonth = monthSelected ? monthMapping[monthSelected] : null;
     const formattedDate = selectedDate ? selectedDate : null;
 
     const response = await fetch("/api/category", {
@@ -234,8 +224,6 @@ useEffect(() => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        year: yearSelected,
-        month: formattedMonth,
         branch: branchSelected,
         category: "NUBRAS GENTS JACKET SECTION",
         date: formattedDate, // Use the formatted date
