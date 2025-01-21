@@ -12,7 +12,13 @@ import QuarterlySalesChart from "./_components/quarterlyChart";
 import HalfYearlySalesChart from "./_components/halfChart";
 import YearlySalesChart from "./_components/yearlyChart";
 import Image from "next/image";
-import { Pagination } from "./_components/pagination"; // New pagination component
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 export default function ShareDashboard() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -39,21 +45,32 @@ function Dashboard() {
   const [categoryData, setCategoryData] = useState([]);
   const [categoryData2, setCategoryData2] = useState([]);
   const [categoryData3, setCategoryData3] = useState([]);
+  const [products, setproducts] = useState([]);
+  const [totals, settotals] = useState([]);
+  const [Monthlytotals, setMonthlytotals] = useState([]);
+  const [products2, setproducts2] = useState([]);
+  const [totals2, settotals2] = useState([]);
+  const [Monthlytotals2, setMonthlytotals2] = useState([]);
+  const [products3, setproducts3] = useState([]);
+  const [totals3, settotals3] = useState([]);
+  const [Monthlytotals3, setMonthlytotals3] = useState([]);
   // const [categoryData4, setCategoryData4] = useState([]);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(searchParams.get("date"));
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = e.target.value;
-    
-    // Format the date in PostgreSQL format (YYYY/MM/DD)
-    const formattedDate = selectedDate
-      ? new Date(selectedDate).toISOString() : null;
-  
+
+    // Check if the selected date is a valid full date (YYYY-MM-DD format)
+    const formattedDate =
+      selectedDate && selectedDate.match(/^\d{4}-\d{2}-\d{2}$/)
+        ? selectedDate
+        : null; // Only allow valid full dates (YYYY-MM-DD format)
+
     setSelectedDate(formattedDate);
   };
+
   // Data filtering function
   const filterData = (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any[],
     yearSelected: string | null,
     monthSelected: string | null,
@@ -124,9 +141,10 @@ function Dashboard() {
     if (monthSelected) params.set("month", monthSelected);
     if (quarterSelected) params.set("quarter", quarterSelected);
     if (halfYearSelected) params.set("halfYear", halfYearSelected);
+    if (selectedDate) params.set("date", selectedDate); // Sync selected date
 
     window.history.replaceState({}, "", "?" + params.toString());
-  }, [yearSelected, monthSelected, quarterSelected, halfYearSelected]);
+  }, [yearSelected, monthSelected, quarterSelected, halfYearSelected, selectedDate]);
 
   // const monthMapping: { [key: string]: string } = {
   //   Jan: "01",
@@ -144,109 +162,118 @@ function Dashboard() {
   // };
 
   // Fetch data from API based on selected filters
-useEffect(() => {
-  const fetchData = async () => {
-    const formattedDate = selectedDate ? selectedDate : null;
+  useEffect(() => {
+    if (!selectedDate) return; // Don't fetch data if selectedDate is not fully entered
+    const fetchData = async () => {
+      const formattedDate = selectedDate;
 
-    const response = await fetch("/api/category", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        branch: branchSelected,
-        category: "NUBRAS GENTS ITEM'S SECTION",
-        date: formattedDate, // Use the formatted date
-      }),
-    });
+      const response = await fetch("/api/category", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          branch: branchSelected,
+          category: "NUBRAS GENTS ITEM'S SECTION",
+          date: formattedDate, // Use the formatted date
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch data");
-    }
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
 
-    const data = await response.json();
-    setCategoryData(data); // Update state with fetched data
-  };
-  fetchData();
-  const fetchData2 = async () => {
-    const formattedDate = selectedDate ? selectedDate : null;
+      const data = await response.json();
+      setCategoryData(data.data); // Update state with fetched data
+      setproducts(data.products); // Update state with fetched data
+      settotals(data.totals); // Update state with fetched data
+      setMonthlytotals(data.monthTotals); // Update state with fetched data
+    };
+    fetchData();
+    const fetchData2 = async () => {
+      const formattedDate = selectedDate ? selectedDate : null;
 
-    const response = await fetch("/api/category", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        branch: branchSelected,
-        category: "NUBRAS JUNIOR KID'S SECTION",
-        date: formattedDate, // Use the formatted date
-      }),
-    });
+      const response = await fetch("/api/category", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          branch: branchSelected,
+          category: "NUBRAS JUNIOR KID'S SECTION",
+          date: formattedDate, // Use the formatted date
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch data");
-    }
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
 
-    const data = await response.json();
-    setCategoryData2(data); // Update state with fetched data
-  };
-  fetchData2();
-  const fetchData3 = async () => {
-    const formattedDate = selectedDate ? selectedDate : null;
+      const data = await response.json();
+      setCategoryData2(data.data); // Update state with fetched data
+      setproducts2(data.products); // Update state with fetched data
+      settotals2(data.totals); // Update state with fetched data
+      setMonthlytotals2(data.monthTotals); // Update state with fetched data
+    };
+    fetchData2();
+    const fetchData3 = async () => {
+      const formattedDate = selectedDate ? selectedDate : null;
 
-    const response = await fetch("/api/category", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        branch: branchSelected,
-        category: "NUBRAS GENTS KANDORA SECTION",
-        date: formattedDate, // Use the formatted date
-      }),
-    });
+      const response = await fetch("/api/category", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          branch: branchSelected,
+          category: "NUBRAS GENTS KANDORA SECTION",
+          date: formattedDate, // Use the formatted date
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch data");
-    }
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
 
-    const data = await response.json();
-    setCategoryData3(data); // Update state with fetched data
-  };
-  fetchData3();
-  // const fetchData4 = async () => {
-  //   const formattedDate = selectedDate ? selectedDate : null;
+      const data = await response.json();
+      setCategoryData3(data.data); // Update state with fetched data
+      setproducts3(data.products); // Update state with fetched data
+      settotals3(data.totals); // Update state with fetched data
+      setMonthlytotals3(data.monthTotals); // Update state with fetched data
+    };
+    fetchData3();
+    // const fetchData4 = async () => {
+    //   const formattedDate = selectedDate ? selectedDate : null;
 
-  //   const response = await fetch("/api/category", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({
-  //       branch: branchSelected,
-  //       category: "NUBRAS GENTS JACKET SECTION",
-  //       date: formattedDate, // Use the formatted date
-  //     }),
-  //   });
+    //   const response = await fetch("/api/category", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       branch: branchSelected,
+    //       category: "NUBRAS GENTS JACKET SECTION",
+    //       date: formattedDate, // Use the formatted date
+    //     }),
+    //   });
 
-  //   if (!response.ok) {
-  //     throw new Error("Failed to fetch data");
-  //   }
+    //   if (!response.ok) {
+    //     throw new Error("Failed to fetch data");
+    //   }
 
-  //   const data = await response.json();
-  //   setCategoryData4(data); // Update state with fetched data
-  // };
-  // fetchData4();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [
-  yearSelected,
-  monthSelected,
-  quarterSelected,
-  halfYearSelected,
-  branchSelected,
-  selectedDate, // Add selectedDate as a dependency
-]);
-
+    //   const data = await response.json();
+    //   setCategoryData4(data); // Update state with fetched data
+    // };
+    // fetchData4();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    yearSelected,
+    monthSelected,
+    quarterSelected,
+    halfYearSelected,
+    branchSelected,
+    selectedDate, // Add selectedDate as a dependency
+  ]);
 
   // Get unique options for dropdowns (you can extract these dynamically from your data)
   const yearOptions = ["2025", "2024", "2023", "2022", "2021", "2020"];
@@ -267,17 +294,6 @@ useEffect(() => {
   const quarterOptions = ["Q1", "Q2", "Q3", "Q4"];
   const halfYearOptions = ["H1", "H2"];
   const branchOptions = ["ABU DHABI BRANCH", "KHALIFA CITY BRANCH"];
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  // Calculate the data to display based on pagination
-  const getPaginatedData = (data: any[]) => {
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return data.slice(startIndex, endIndex);
-  };
 
   // Filtered data based on selected filters
   const filteredMonthlyData = filterData(
@@ -308,14 +324,10 @@ useEffect(() => {
     quarterSelected,
     halfYearSelected
   );
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10); // Number of items per page
-
   // Paginated category data
-  const paginatedCategoryData = getPaginatedData(categoryData);
-  const paginatedCategoryData2 = getPaginatedData(categoryData2);
-  const paginatedCategoryData3 = getPaginatedData(categoryData3);
+  const paginatedCategoryData = categoryData;
+  const paginatedCategoryData2 = categoryData2;
+  const paginatedCategoryData3 = categoryData3;
   // const paginatedCategoryData4 = getPaginatedData(categoryData4);
 
   return (
@@ -403,28 +415,128 @@ useEffect(() => {
         </div>
       </div>
 
-      <div className="p-6 mt-[150px] xl:space-y-0 gap-4 space-y-6 grid grid-cols-1 grid-flow-row 2xl:grid-cols-2">
-        {/* Cards */}
-        {/* Pagination controls */}
-        <Pagination
-          currentPage={currentPage}
-          totalItems={categoryData.length}
-          pageSize={pageSize}
-          onPageChange={handlePageChange}
-        />
-        <SalesTable name="NUBRAS GENTS ITEM'S SECTION" data={paginatedCategoryData} />
-        <SalesTable name="NUBRAS JUNIOR KID'S SECTION" data={paginatedCategoryData2} />
-        <SalesTable name="NUBRAS GENTS KANDORA SECTION" data={paginatedCategoryData3} />
+      <div className="p-6 mt-[150px] xl:space-y-0 gap-20 grid grid-cols-1 grid-flow-row 2xl:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle contentEditable className="max-w-max">
+              NUBRAS GENTS ITEM&apos;S SECTION
+            </CardTitle>
+            <CardDescription contentEditable>
+              add your description here
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            <SalesTable
+              name="DAILY SALES DATA FOR NUBRAS GENTS ITEM'S SECTION"
+              data={paginatedCategoryData || []}
+            />
+            <SalesTable
+              name="PRODUCT LISTS FOR NUBRAS GENTS ITEM'S SECTION"
+              data={products || []}
+            />
+            <SalesTable
+              name="DAILY TOTALS FOR NUBRAS GENTS ITEM'S SECTION"
+              data={totals || []}
+            />
+            <SalesTable
+              name="MONTHLY TOTALS FOR NUBRAS GENTS ITEM'S SECTION"
+              data={Monthlytotals || []}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle contentEditable className="max-w-max">
+              NUBRAS JUNIOR KID&apos;S SECTION
+            </CardTitle>
+            <CardDescription contentEditable>
+              add your description here
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            <SalesTable
+              name="DAILY SALES DATA FOR NUBRAS JUNIOR KID'S SECTION"
+              data={paginatedCategoryData2 || []}
+            />
+            <SalesTable
+              name="PRODUCT LISTS FOR NUBRAS JUNIOR KID'S SECTION"
+              data={products2 || []}
+            />
+            <SalesTable
+              name="DAILY TOTALS FOR NUBRAS JUNIOR KID'S SECTION"
+              data={totals2 || []}
+            />
+            <SalesTable
+              name="MONTHLY TOTALS FOR NUBRAS JUNIOR KID'S SECTION"
+              data={Monthlytotals2 || []}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle contentEditable className="max-w-max">
+              NUBRAS GENTS KANDORA SECTION
+            </CardTitle>
+            <CardDescription contentEditable>
+              add your description here
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            <SalesTable
+              name="DAILY SALES DATA FOR NUBRAS GENTS KANDORA SECTION"
+              data={paginatedCategoryData3 || []}
+            />
+            <SalesTable
+              name="PRODUCT LISTS FOR NUBRAS GENTS KANDORA SECTION"
+              data={products3 || []}
+            />
+            <SalesTable
+              name="DAILY TOTALS FOR NUBRAS GENTS KANDORA SECTION"
+              data={totals3 || []}
+            />
+            <SalesTable
+              name="MONTHLY TOTALS FOR NUBRAS GENTS KANDORA SECTION"
+              data={Monthlytotals3 || []}
+            />
+          </CardContent>
+        </Card>
+
+
+        <div className="space-y-6">
+
         {/* <SalesTable name="NUBRAS GENTS JACKET SECTION" data={paginatedCategoryData4} /> */}
-        <SalesTable name="MONTHLY SALES DATA" data={filteredMonthlyData} />
-        <SalesTable name="QUARTERLY SALES DATA" data={filteredQuarterlyData} />
-        <SalesTable name="HALF YEARLY SALES DATA" data={filteredHalfYearlyData} />
-        <SalesTable name="YEARLY SALES DATA" data={filteredYearlyData} />
-        {/* <CategoryChart data={paginatedCategoryData} /> */}
         <MonthlySalesChart data={filteredMonthlyData} />
+        <SalesTable
+          name="MONTHLY SALES DATA"
+          data={filteredMonthlyData || []}
+          />
+          </div>
+        <div className="space-y-6">
+
         <QuarterlySalesChart data={filteredQuarterlyData} />
+        <SalesTable
+          name="QUARTERLY SALES DATA"
+          data={filteredQuarterlyData || []}
+        />
+        </div>
+        <div className="space-y-6">
+
         <HalfYearlySalesChart data={filteredHalfYearlyData} />
+        <SalesTable
+          name="HALF YEARLY SALES DATA"
+          data={filteredHalfYearlyData}
+        />
+        </div>
+
+        <div className="space-y-6">
+
         <YearlySalesChart data={filteredYearlyData} />
+        <SalesTable name="YEARLY SALES DATA" data={filteredYearlyData || []} />
+        </div>
+        {/* <CategoryChart data={paginatedCategoryData} /> */}
       </div>
     </div>
   );

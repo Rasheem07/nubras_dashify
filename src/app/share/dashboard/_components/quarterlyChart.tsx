@@ -20,7 +20,7 @@ const QuarterlySalesChart = ({data}: {data: any[]}) => {
         <CardTitle>Quarterly Sales Data</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={data.length > 4 && data.length < 8 ? 800 : data.length > 8? 2000 : 400}>
+        <ResponsiveContainer width="100%" height={data.length > 4 && data.length < 8 ? 1200 : data.length > 8? 2000 : 400}>
           <BarChart
             layout="vertical"
             barGap={5} // Adjust spacing between bars within a group
@@ -68,21 +68,21 @@ const QuarterlySalesChart = ({data}: {data: any[]}) => {
               <LabelList
                 dataKey="totalSale"
                 position="right"
-                style={{ fill: "#8884d8", fontWeight: "500" }} // Medium font
+                style={{ fill: "#8884d8", fontWeight: "500", fontSize:"14px"  }} // Medium font
               />
             </Bar>
             <Bar dataKey="averageSale" xAxisId={2} fill="#82ca9d" name="Average Sale" barSize={20}>
               <LabelList
                 dataKey="averageSale"
                 position="right"
-                style={{ fill: "#82ca9d", fontWeight: "500" }} // Medium font
+                style={{ fill: "#82ca9d", fontWeight: "500", fontSize:"14px" }} // Medium font
               />
             </Bar>
             <Bar dataKey="saleCount" xAxisId={2} fill="#ffc658" name="Sale Count" barSize={20}>
               <LabelList
                 dataKey="saleCount"
                 position="right"
-                style={{ fill: "#ffc658", fontWeight: "500" }} // Medium font
+                style={{ fill: "#ffc658", fontWeight: "500", fontSize:"14px"  }} // Medium font
               />
             </Bar>
           </BarChart>

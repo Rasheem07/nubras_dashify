@@ -16,8 +16,8 @@ const Table = ({ data }: { data: DataRow[] }) => {
     () =>
       data.length > 0
         ? Object.keys(data[0]).map((key) => ({
-            Header: key, // Header is the key of the object
-            accessor: key, // Key to access the data for that column
+            Header: key,
+            accessor: key,
           }))
         : [],
     [data]
@@ -27,10 +27,13 @@ const Table = ({ data }: { data: DataRow[] }) => {
     useTable({ columns, data });
 
   return (
-    <div className="overflow-x-auto"> {/* Add horizontal scrolling here */}
+    <div className="overflow-x-auto">
       <table
         {...getTableProps()}
-        className="min-w-full border shadow-sm max-h-[250px]"
+        className="min-w-full border shadow-sm"
+        style={{
+          tableLayout: "fixed", // Fix column widths
+        }}
       >
         <thead className="bg-gray-300">
           {headerGroups.map((headerGroup) => (
@@ -39,10 +42,10 @@ const Table = ({ data }: { data: DataRow[] }) => {
                 <th
                   {...column.getHeaderProps()}
                   key={Math.random()}
-                  className="px-6 py-3 text-center text-sm font-semibold bg-gray-200"
-                  style={{
-                    borderBottom: "1px solid #ddd",
-                    backgroundColor: "#f7fafc", // Light gray background for headers
+                  className="text-xs font-medium py-2 px-1 bg-gray-200 text-center border border-gray-300"
+                  style={{ // Smaller padding
+                    width: `${100 / columns.length}%`, // Distribute column widths equally
+                    whiteSpace: "nowrap", // Prevent wrapping
                   }}
                 >
                   {column.render("Header")}
@@ -58,18 +61,19 @@ const Table = ({ data }: { data: DataRow[] }) => {
               <tr
                 {...row.getRowProps()}
                 key={Math.random()}
-                className={`hover:bg-gray-50 ${
+                className={`${
                   rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"
-                }`}
+                } hover:bg-gray-50`}
               >
                 {row.cells.map((cell) => (
                   <td
                     {...cell.getCellProps()}
                     key={Math.random()}
-                    className="px-4 py-2 text-sm text-nowrap text-center text-gray-600"
-                    style={{
-                      borderBottom: "1px solid #ddd",
-                      backgroundColor: "white",
+                    className="text-xs py-1.5 px-1 text-center border border-gray-200"
+                    style={{ // Smaller padding
+                      whiteSpace: "nowrap", // Prevent wrapping
+                      overflow: "hidden", // Hide overflowing text
+                      textOverflow: "ellipsis", // Show ellipsis if text overflows
                     }}
                   >
                     {cell.render("Cell")}
@@ -84,6 +88,8 @@ const Table = ({ data }: { data: DataRow[] }) => {
   );
 };
 
+
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const SalesTable = ({ data, className, name="Sales Data Table", description="Sales data for the selected period" }: { data: any[]; className?: string, name?: string; description?: string}) => {
   // Export function for Excel
@@ -96,12 +102,12 @@ const SalesTable = ({ data, className, name="Sales Data Table", description="Sal
 
   return (
     <div className={cn("", className)}>
-      <Card className="shadow-sm border border-gray-200 min-h-[365px] rounded-lg overflow-hidden">
+      <Card className="shadow-sm border border-gray-200  rounded-lg overflow-hidden">
         <CardHeader className="p-4 flex flex-row justify-between items-center">
           <div>
 
-          <CardTitle className="max-w-max">{name}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+          <CardTitle contentEditable className="max-w-max">{name}</CardTitle>
+          <CardDescription contentEditable>{description}</CardDescription>
           </div>
           <Button
             onClick={exportToExcel}
