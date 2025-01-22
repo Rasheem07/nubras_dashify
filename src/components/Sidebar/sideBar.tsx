@@ -5,7 +5,6 @@ import { useSidebar } from "@/contexts/SiderbarContext";
 import Logo from "../Icons/Logo";
 import SideBarNavLink from "./sideBarNavLink";
 import { Bell, Book, Database, LayoutDashboard } from "lucide-react";
-import { UserButton } from "../userButton/userButton";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -35,9 +34,6 @@ const Sidebar: React.FC = () => {
               <SideBarNavLink Icon={Bell} text="Notifications" isActive={path == "/notifications"} />
             </div>
             {/* Add your sidebar content here */}
-          </div>
-          <div className="mt-48">
-            <UserButton />
           </div>
         </div>
       )}

@@ -46,6 +46,7 @@ function Dashboard() {
   const [categoryData2, setCategoryData2] = useState([]);
   const [categoryData3, setCategoryData3] = useState([]);
   const [products, setproducts] = useState([]);
+  const [products4, setproducts4] = useState([]);
   const [totals, settotals] = useState([]);
   const [Monthlytotals, setMonthlytotals] = useState([]);
   const [products2, setproducts2] = useState([]);
@@ -54,8 +55,12 @@ function Dashboard() {
   const [products3, setproducts3] = useState([]);
   const [totals3, settotals3] = useState([]);
   const [Monthlytotals3, setMonthlytotals3] = useState([]);
-  // const [categoryData4, setCategoryData4] = useState([]);
-  const [selectedDate, setSelectedDate] = useState<string | null>(searchParams.get("date"));
+  const [totals4, settotals4] = useState([]);
+  const [Monthlytotals4, setMonthlytotals4] = useState([]);
+  const [categoryData4, setCategoryData4] = useState([]);
+  const [selectedDate, setSelectedDate] = useState<string | null>(
+    searchParams.get("date")
+  );
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = e.target.value;
@@ -144,7 +149,13 @@ function Dashboard() {
     if (selectedDate) params.set("date", selectedDate); // Sync selected date
 
     window.history.replaceState({}, "", "?" + params.toString());
-  }, [yearSelected, monthSelected, quarterSelected, halfYearSelected, selectedDate]);
+  }, [
+    yearSelected,
+    monthSelected,
+    quarterSelected,
+    halfYearSelected,
+    selectedDate,
+  ]);
 
   // const monthMapping: { [key: string]: string } = {
   //   Jan: "01",
@@ -242,29 +253,32 @@ function Dashboard() {
       setMonthlytotals3(data.monthTotals); // Update state with fetched data
     };
     fetchData3();
-    // const fetchData4 = async () => {
-    //   const formattedDate = selectedDate ? selectedDate : null;
+    const fetchData4 = async () => {
+      const formattedDate = selectedDate ? selectedDate : null;
 
-    //   const response = await fetch("/api/category", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({
-    //       branch: branchSelected,
-    //       category: "NUBRAS GENTS JACKET SECTION",
-    //       date: formattedDate, // Use the formatted date
-    //     }),
-    //   });
+      const response = await fetch("/api/category", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          branch: branchSelected,
+          category: "NUBRAS GENTS JACKET SECTION",
+          date: formattedDate, // Use the formatted date
+        }),
+      });
 
-    //   if (!response.ok) {
-    //     throw new Error("Failed to fetch data");
-    //   }
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
 
-    //   const data = await response.json();
-    //   setCategoryData4(data); // Update state with fetched data
-    // };
-    // fetchData4();
+      const data = await response.json();
+      setCategoryData4(data.data); // Update state with fetched data
+      setproducts4(data.products); // Update state with fetched data
+      settotals4(data.totals); // Update state with fetched data
+      setMonthlytotals4(data.monthTotals);
+    };
+    fetchData4();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     yearSelected,
@@ -328,7 +342,7 @@ function Dashboard() {
   const paginatedCategoryData = categoryData;
   const paginatedCategoryData2 = categoryData2;
   const paginatedCategoryData3 = categoryData3;
-  // const paginatedCategoryData4 = getPaginatedData(categoryData4);
+  const paginatedCategoryData4 = categoryData4;
 
   return (
     <div className="w-full" id="container">
@@ -419,6 +433,35 @@ function Dashboard() {
         <Card>
           <CardHeader>
             <CardTitle contentEditable className="max-w-max">
+              NUBRAS GENTS KANDORA SECTION
+            </CardTitle>
+            <CardDescription contentEditable>
+              add your description here
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            <SalesTable
+              name="DAILY SALES DATA FOR NUBRAS GENTS KANDORA SECTION"
+              data={paginatedCategoryData3 || []}
+            />
+            <SalesTable
+              name="PRODUCT LISTS FOR NUBRAS GENTS KANDORA SECTION"
+              data={products3 || []}
+            />
+            <SalesTable
+              name="DAILY TOTALS FOR NUBRAS GENTS KANDORA SECTION"
+              data={totals3 || []}
+            />
+            <SalesTable
+              name="MONTHLY TOTALS FOR NUBRAS GENTS KANDORA SECTION"
+              data={Monthlytotals3 || []}
+            />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle contentEditable className="max-w-max">
               NUBRAS GENTS ITEM&apos;S SECTION
             </CardTitle>
             <CardDescription contentEditable>
@@ -445,6 +488,38 @@ function Dashboard() {
             />
           </CardContent>
         </Card>
+
+        {paginatedCategoryData4.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle contentEditable className="max-w-max">
+                NUBRAS GENTS JACKET SECTION
+              </CardTitle>
+              <CardDescription contentEditable>
+                add your description here
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+              <SalesTable
+                name="DAILY SALES DATA FOR NUBRAS GENTS KANDORA SECTION"
+                data={paginatedCategoryData4 || []}
+              />
+              <SalesTable
+                name="PRODUCT LISTS FOR NUBRAS GENTS KANDORA SECTION"
+                data={products4 || []}
+              />
+              <SalesTable
+                name="DAILY TOTALS FOR NUBRAS GENTS KANDORA SECTION"
+                data={totals4 || []}
+              />
+              <SalesTable
+                name="MONTHLY TOTALS FOR NUBRAS GENTS KANDORA SECTION"
+                data={Monthlytotals4 || []}
+              />
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardHeader>
             <CardTitle contentEditable className="max-w-max">
@@ -474,67 +549,36 @@ function Dashboard() {
             />
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle contentEditable className="max-w-max">
-              NUBRAS GENTS KANDORA SECTION
-            </CardTitle>
-            <CardDescription contentEditable>
-              add your description here
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            <SalesTable
-              name="DAILY SALES DATA FOR NUBRAS GENTS KANDORA SECTION"
-              data={paginatedCategoryData3 || []}
-            />
-            <SalesTable
-              name="PRODUCT LISTS FOR NUBRAS GENTS KANDORA SECTION"
-              data={products3 || []}
-            />
-            <SalesTable
-              name="DAILY TOTALS FOR NUBRAS GENTS KANDORA SECTION"
-              data={totals3 || []}
-            />
-            <SalesTable
-              name="MONTHLY TOTALS FOR NUBRAS GENTS KANDORA SECTION"
-              data={Monthlytotals3 || []}
-            />
-          </CardContent>
-        </Card>
-
 
         <div className="space-y-6">
-
-        {/* <SalesTable name="NUBRAS GENTS JACKET SECTION" data={paginatedCategoryData4} /> */}
-        <MonthlySalesChart data={filteredMonthlyData} />
-        <SalesTable
-          name="MONTHLY SALES DATA"
-          data={filteredMonthlyData || []}
+          {/* <SalesTable name="NUBRAS GENTS JACKET SECTION" data={paginatedCategoryData4} /> */}
+          <MonthlySalesChart data={filteredMonthlyData} />
+          <SalesTable
+            name="MONTHLY SALES DATA"
+            data={filteredMonthlyData || []}
           />
-          </div>
-        <div className="space-y-6">
-
-        <QuarterlySalesChart data={filteredQuarterlyData} />
-        <SalesTable
-          name="QUARTERLY SALES DATA"
-          data={filteredQuarterlyData || []}
-        />
         </div>
         <div className="space-y-6">
-
-        <HalfYearlySalesChart data={filteredHalfYearlyData} />
-        <SalesTable
-          name="HALF YEARLY SALES DATA"
-          data={filteredHalfYearlyData}
-        />
+          <QuarterlySalesChart data={filteredQuarterlyData} />
+          <SalesTable
+            name="QUARTERLY SALES DATA"
+            data={filteredQuarterlyData || []}
+          />
+        </div>
+        <div className="space-y-6">
+          <HalfYearlySalesChart data={filteredHalfYearlyData} />
+          <SalesTable
+            name="HALF YEARLY SALES DATA"
+            data={filteredHalfYearlyData}
+          />
         </div>
 
         <div className="space-y-6">
-
-        <YearlySalesChart data={filteredYearlyData} />
-        <SalesTable name="YEARLY SALES DATA" data={filteredYearlyData || []} />
+          <YearlySalesChart data={filteredYearlyData} />
+          <SalesTable
+            name="YEARLY SALES DATA"
+            data={filteredYearlyData || []}
+          />
         </div>
         {/* <CategoryChart data={paginatedCategoryData} /> */}
       </div>
