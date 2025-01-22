@@ -18,7 +18,7 @@ export default function Totals() {
   if (!salesData) return <p>Loading...</p>;
 
   const cardsData = [
-    { name: 'Product Quantity', total: salesData['Total Product Quantity'], average: salesData['Average Product Quantity'], bgColor: 'bg-blue-100' },
+    // { name: 'Product Quantity', total: salesData['Total Product Quantity'], average: salesData['Average Product Quantity'], bgColor: 'bg-blue-100' },
     { name: 'Visa Payment', total: salesData['Total Visa Payment'], average: salesData['Average Visa Payment'], bgColor: 'bg-green-100' },
     { name: 'Bank Transfer Payment', total: salesData['Total Bank Transfer Payment'], average: salesData['Average Bank Transfer Payment'], bgColor: 'bg-yellow-100' },
     { name: 'Cash Payment', total: salesData['Total Cash Payment'], average: salesData['Average Cash Payment'], bgColor: 'bg-red-100' },

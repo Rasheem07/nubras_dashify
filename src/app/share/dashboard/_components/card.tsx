@@ -12,7 +12,7 @@ const SalesCard = ({
   title2?: string;
   name: string;
   total: number;
-  average: number;
+  average?: number;
 }) => {
   return (
     <div className=" w-full bg-white rounded-lg shadow-lg overflow-hidden border border-gray-300">

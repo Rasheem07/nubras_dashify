@@ -454,7 +454,7 @@ function Dashboard() {
         </div>
       </div>
 
-      <TotalsForCurrent />
+      <TotalsForCurrent date={selectedDate as string} />
 
       <div className="p-6  xl:space-y-0 gap-8 grid grid-cols-1 grid-flow-row 2xl:grid-cols-2">
         <Card>
