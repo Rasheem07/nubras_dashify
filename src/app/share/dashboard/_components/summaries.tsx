@@ -30,7 +30,11 @@ export default function Totals() {
   ];
 
   return (
-    <div className="grid mt-[150px] min-h-64 gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3  p-6 ">
+    <div className="space-y-4  p-6">
+      <h1 className="text-2xl font-bold text-teal-900">
+        Summaries for All Sales
+      </h1>
+    <div className="grid  min-h-64 gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
       {cardsData.map((card, index) => (
         <SalesCard
           key={index}
@@ -41,6 +45,7 @@ export default function Totals() {
           title2={`Average of ${card.name}`}
         />
       ))}
+    </div>
     </div>
   );
 }
