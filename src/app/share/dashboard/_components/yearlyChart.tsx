@@ -27,7 +27,7 @@ const YearlySalesChart = ({data}: {data: any[]}) => {
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
-            <YAxis yAxisId="left" tickFormatter={(value) => `$${value / 1000}k`} />
+            <YAxis yAxisId="left" tickFormatter={(value) => `${value / 1000}k`} />
             <YAxis
               yAxisId="right"
               orientation="right"
