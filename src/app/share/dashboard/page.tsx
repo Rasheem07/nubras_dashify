@@ -452,8 +452,7 @@ function Dashboard() {
           <input
             className="max-w-max border rouned-md px-2 "
             type="text"
-            value={selectedDate || ""}
-            placeholder="YYYY-MM-DD"
+            placeholder={selectedDate || "YYYY-MM-DD"}
             onChange={handleDateChange}
           />
         </div>
