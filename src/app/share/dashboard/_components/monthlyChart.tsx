@@ -23,7 +23,7 @@ const MonthlySalesChart = ({data, name}: {data: any[], name: string}) => {
         <ResponsiveContainer width="100%" height={400}>
           <AreaChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
+            <XAxis dataKey="month_year" />
             <YAxis yAxisId={1} />
             <YAxis yAxisId={2} orientation="right" />
             <Tooltip />

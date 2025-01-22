@@ -59,7 +59,7 @@ const QuarterlySalesChart = ({data, name}: {data: any[], name: string}) => {
               offset={-40}
             />
             
-            <YAxis type="category" dataKey="quarterYear" />
+            <YAxis type="category" dataKey="quarter_year" />
             <Tooltip />
             <Legend />
             

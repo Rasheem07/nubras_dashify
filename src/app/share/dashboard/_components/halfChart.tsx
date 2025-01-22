@@ -23,7 +23,7 @@ const HalfYearlySalesChart = ({data, name}: {data: any[], name: string}) => {
         <ResponsiveContainer width="100%" height={400}>
           <ComposedChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="interval" />
+            <XAxis dataKey="half_year" />
             <YAxis yAxisId="left" />
             <YAxis yAxisId="right" orientation="right" />
             <Tooltip />
