@@ -13,11 +13,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const HalfYearlySalesChart = ({data}: {data: any[]}) => {
+const HalfYearlySalesChart = ({data, name}: {data: any[], name: string}) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Half-Yearly Sales Data</CardTitle>
+        <CardTitle>{name}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={400}>
@@ -31,7 +31,7 @@ const HalfYearlySalesChart = ({data}: {data: any[]}) => {
             {/* Bar for Sale Count */}
             <Bar
               yAxisId="left"
-              dataKey="saleCount"
+              dataKey="total_orders"
               fill="#82ca9d"
               name="Sale Count"
               barSize={24}
@@ -40,17 +40,17 @@ const HalfYearlySalesChart = ({data}: {data: any[]}) => {
             <Line
               yAxisId="right"
               type="monotone"
-              dataKey="totalSale"
+              dataKey="Total sales amount"
               stroke="#8884d8"
-              name="Total Sales"
+              name="Total Sales amount"
             />
             {/* Line for Average Sale */}
             <Line
               yAxisId="left"
               type="monotone"
-              dataKey="averageSale"
+              dataKey="Average sales amount"
               stroke="#ffc658"
-              name="Average Sale"
+              name="Average Sales amount"
             />
           </ComposedChart>
         </ResponsiveContainer>

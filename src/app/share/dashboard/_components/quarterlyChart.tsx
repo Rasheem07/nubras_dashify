@@ -13,11 +13,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const QuarterlySalesChart = ({data}: {data: any[]}) => {
+const QuarterlySalesChart = ({data, name}: {data: any[], name: string}) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Quarterly Sales Data</CardTitle>
+        <CardTitle>{name}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={data.length > 4 && data.length < 8 ? 1200 : data.length > 8? 2000 : 400}>
@@ -64,21 +64,21 @@ const QuarterlySalesChart = ({data}: {data: any[]}) => {
             <Legend />
             
             {/* Bars */}
-            <Bar dataKey="totalSale" fill="#8884d8" name="Total Sales" barSize={20}>
+            <Bar dataKey="Total sales amount" fill="#8884d8" name="Total Sales" barSize={20}>
               <LabelList
                 dataKey="totalSale"
                 position="right"
                 style={{ fill: "#8884d8", fontWeight: "500", fontSize:"14px"  }} // Medium font
               />
             </Bar>
-            <Bar dataKey="averageSale" xAxisId={2} fill="#82ca9d" name="Average Sale" barSize={20}>
+            <Bar dataKey="Average sales amount" xAxisId={2} fill="#82ca9d" name="Average Sale" barSize={20}>
               <LabelList
                 dataKey="averageSale"
                 position="right"
                 style={{ fill: "#82ca9d", fontWeight: "500", fontSize:"14px" }} // Medium font
               />
             </Bar>
-            <Bar dataKey="saleCount" xAxisId={2} fill="#ffc658" name="Sale Count" barSize={20}>
+            <Bar dataKey="total_orders" xAxisId={2} fill="#ffc658" name="Sale Count" barSize={20}>
               <LabelList
                 dataKey="saleCount"
                 position="right"

@@ -12,11 +12,11 @@ import {
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-const MonthlySalesChart = ({data}: {data: any[]}) => {
+const MonthlySalesChart = ({data, name}: {data: any[], name: string}) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Quarterly Sales Data</CardTitle>
+        <CardTitle>{name}</CardTitle>
         <CardDescription>Count of sales and Total sales vs average sales</CardDescription>
       </CardHeader>
       <CardContent>
@@ -31,21 +31,21 @@ const MonthlySalesChart = ({data}: {data: any[]}) => {
             <Area
               type="monotone"
               yAxisId={1}
-              dataKey="dailyTotalSaleAmount"
+              dataKey="Total sales amount"
               stroke="#8884d8"
               fill="#8884d8"
             />
             <Area
               type="monotone"
               yAxisId={2}
-              dataKey="countOfSales"
+              dataKey="total_orders"
               stroke="#82ca9d"
               fill="#82ca9d"
             />
             <Area
               type="monotone"
               yAxisId={1}
-              dataKey="averageSale"
+              dataKey="Average sales amount"
               stroke="#ffc658"
               fill="#ffc658"
             />

@@ -3,10 +3,6 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation"; // Import useSearchParams from Next.js
 import SalesTable from "@/app/dashboards/_components/salesTable";
-import salesData from "./_data/monthlyData";
-import quarterlySalesData from "./_data/quarterlySalesData";
-import halfYearlySalesData from "./_data/halfYearlySalesData";
-import yearlySalesData from "./_data/yearlySalesData";
 import MonthlySalesChart from "./_components/monthlyChart";
 import QuarterlySalesChart from "./_components/quarterlyChart";
 import HalfYearlySalesChart from "./_components/halfChart";
@@ -19,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Totals from "./_components/summaries";
 export default function ShareDashboard() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -42,6 +39,10 @@ function Dashboard() {
     searchParams.get("halfYear")
   );
   const [branchSelected, setBranchSelected] = useState<string | null>("");
+  const [monthlyData, setmonthlyData] = useState<any[]>([]);
+  const [quarterlyData, setquarterlyData] = useState<any[]>([])
+  const [haflyData, sethaflyData] = useState([]);
+  const [yearlyData, setyearlyData] = useState([])
   const [categoryData, setCategoryData] = useState([]);
   const [categoryData2, setCategoryData2] = useState([]);
   const [categoryData3, setCategoryData3] = useState([]);
@@ -61,6 +62,16 @@ function Dashboard() {
   const [selectedDate, setSelectedDate] = useState<string | null>(
     searchParams.get("date")
   );
+  const [newOrders, setnewOrders] = useState<{
+    invoices: any[];
+    totals: any[];
+    monthTotals: any[];
+  }>({ invoices: [], totals: [], monthTotals: [] });
+  const [oldOrders, setoldOrders] = useState<{
+    invoices: any[];
+    totals: any[];
+    monthTotals: any[];
+  }>({ invoices: [], totals: [], monthTotals: [] });
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = e.target.value;
@@ -72,49 +83,6 @@ function Dashboard() {
         : null; // Only allow valid full dates (YYYY-MM-DD format)
 
     setSelectedDate(formattedDate);
-  };
-
-  // Data filtering function
-  const filterData = (
-    data: any[],
-    yearSelected: string | null,
-    monthSelected: string | null,
-    quarterSelected: string | null,
-    halfYearSelected: string | null
-  ) => {
-    return data.filter((item) => {
-      let isValid = true;
-
-      // Filter by year (applies to all data types)
-      if (yearSelected) {
-        isValid =
-          isValid &&
-          (item.year
-            ? item.year === yearSelected
-            : item.month?.includes(yearSelected) ||
-              item.quarterYear?.includes(yearSelected) ||
-              item.interval?.includes(yearSelected));
-      }
-
-      // Filter by month (only applies to monthly data)
-      if (monthSelected && data === salesData) {
-        isValid = isValid && item.month.includes(monthSelected); // Compare month part only
-      }
-
-      // Filter by quarter (only applies to quarterly data)
-      if (quarterSelected && data === quarterlySalesData) {
-        const quarter = item.quarterYear.split("-")[1]; // Extract the quarter part from `quarterYear` (e.g., "Q1", "Q2")
-        isValid = isValid && quarter === quarterSelected; // Compare only the quarter part
-      }
-
-      // Filter by half-year (only applies to half-yearly data)
-      if (halfYearSelected && data === halfYearlySalesData) {
-        const halfYear = item.interval.split("-")[1]; // Extract the half-year part from `interval` (e.g., "H1", "H2")
-        isValid = isValid && halfYear === halfYearSelected; // Compare only the half-year part
-      }
-
-      return isValid;
-    });
   };
 
   // Handle change for dropdown filters
@@ -157,20 +125,111 @@ function Dashboard() {
     selectedDate,
   ]);
 
-  // const monthMapping: { [key: string]: string } = {
-  //   Jan: "01",
-  //   Feb: "02",
-  //   Mar: "03",
-  //   Apr: "04",
-  //   May: "05",
-  //   Jun: "06",
-  //   Jul: "07",
-  //   Aug: "08",
-  //   Sep: "09",
-  //   Oct: "10",
-  //   Nov: "11",
-  //   Dec: "12",
-  // };
+  useEffect(() => {
+
+    const fetchMonthlyData = async () => {
+      const response = await fetch("/api/monthly", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          year: yearSelected,
+        }),
+      });
+
+
+      const data = await response.json();
+      setmonthlyData(data);
+    }
+    fetchMonthlyData()
+    const fetchQuarterlyData = async () => {
+      const response = await fetch("/api/quarterly", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          year: yearSelected,
+        }),
+      });
+
+
+      const data = await response.json();
+      setquarterlyData(data);
+    }
+    fetchQuarterlyData()
+    const fetchHalflyData = async () => {
+      const response = await fetch("/api/halfly", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          year: yearSelected,
+        }),
+      });
+
+
+      const data = await response.json();
+      sethaflyData(data);
+    }
+    fetchHalflyData()
+    const fetchYearlyData = async () => {
+      const response = await fetch("/api/yearly", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          year: yearSelected,
+        }),
+      });
+
+
+      const data = await response.json();
+      setyearlyData(data);
+    }
+    fetchYearlyData()
+  }, [yearSelected]);
+
+  useEffect(() => {
+    if (!selectedDate) return; // Don't fetch data if selectedDate is not fully entered
+    const fetchData = async () => {
+      const response = await fetch("/api/invoice", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: selectedDate,
+          type: "NEW ORDER PAYMENT",
+        }),
+      });
+
+      const invoices = await response.json();
+      setnewOrders(invoices);
+    };
+
+    fetchData();
+    const fetchData2 = async () => {
+      const response = await fetch("/api/invoice", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: selectedDate,
+          type: "OLD ORDER PAYMENT",
+        }),
+      });
+
+      const invoices = await response.json();
+      setoldOrders(invoices);
+    };
+
+    fetchData2();
+  }, [selectedDate]);
 
   // Fetch data from API based on selected filters
   useEffect(() => {
@@ -308,36 +367,6 @@ function Dashboard() {
   const quarterOptions = ["Q1", "Q2", "Q3", "Q4"];
   const halfYearOptions = ["H1", "H2"];
   const branchOptions = ["ABU DHABI BRANCH", "KHALIFA CITY BRANCH"];
-
-  // Filtered data based on selected filters
-  const filteredMonthlyData = filterData(
-    salesData,
-    yearSelected,
-    monthSelected,
-    quarterSelected,
-    halfYearSelected
-  );
-  const filteredQuarterlyData = filterData(
-    quarterlySalesData,
-    yearSelected,
-    null,
-    quarterSelected,
-    halfYearSelected
-  );
-  const filteredHalfYearlyData = filterData(
-    halfYearlySalesData,
-    yearSelected,
-    null,
-    quarterSelected,
-    halfYearSelected
-  );
-  const filteredYearlyData = filterData(
-    yearlySalesData,
-    yearSelected,
-    null,
-    quarterSelected,
-    halfYearSelected
-  );
   // Paginated category data
   const paginatedCategoryData = categoryData;
   const paginatedCategoryData2 = categoryData2;
@@ -423,67 +452,66 @@ function Dashboard() {
           <input
             className="max-w-max border rouned-md px-2 "
             type="text"
+            value={selectedDate || ""}
             placeholder="YYYY-MM-DD"
             onChange={handleDateChange}
           />
         </div>
       </div>
 
-      <div className="p-6 mt-[150px] xl:space-y-0 gap-20 grid grid-cols-1 grid-flow-row 2xl:grid-cols-2">
+      <Totals />
+
+      <div className="p-6  xl:space-y-0 gap-8 grid grid-cols-1 grid-flow-row 2xl:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle contentEditable className="max-w-max">
+            <CardTitle className="max-w-max font-bold text-teal-700">
               NUBRAS GENTS KANDORA SECTION
             </CardTitle>
-            <CardDescription contentEditable>
-              add your description here
-            </CardDescription>
+            <CardDescription>add your description here</CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
             <SalesTable
-              name="DAILY SALES DATA FOR NUBRAS GENTS KANDORA SECTION"
+              name={`DAILY SALES DATA FOR NUBRAS GENTS KANDORA SECTION ${selectedDate && `FOR ${selectedDate}`}`}
               data={paginatedCategoryData3 || []}
             />
             <SalesTable
-              name="PRODUCT LISTS FOR NUBRAS GENTS KANDORA SECTION"
+              name={`PRODUCT LISTS FOR NUBRAS GENTS KANDORA SECTION ${selectedDate && `FOR ${selectedDate}`}`}
               data={products3 || []}
             />
             <SalesTable
-              name="DAILY TOTALS FOR NUBRAS GENTS KANDORA SECTION"
+              name={`DAILY TOTALS FOR NUBRAS GENTS KANDORA SECTION ${selectedDate && `FOR ${selectedDate}`}`}
               data={totals3 || []}
             />
             <SalesTable
-              name="MONTHLY TOTALS FOR NUBRAS GENTS KANDORA SECTION"
+              name={`MONTHLY TOTALS FOR NUBRAS GENTS KANDORA SECTION ${selectedDate && `FOR ${selectedDate}`}`}
               data={Monthlytotals3 || []}
             />
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle contentEditable className="max-w-max">
+            <CardTitle className="max-w-max font-bold text-teal-700">
               NUBRAS GENTS ITEM&apos;S SECTION
             </CardTitle>
-            <CardDescription contentEditable>
-              add your description here
-            </CardDescription>
+            <CardDescription>add your description here</CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
             <SalesTable
-              name="DAILY SALES DATA FOR NUBRAS GENTS ITEM'S SECTION"
+              name={`DAILY SALES DATA FOR NUBRAS GENTS ITEM'S SECTION ${selectedDate && `FOR ${selectedDate}`}`}
               data={paginatedCategoryData || []}
             />
             <SalesTable
-              name="PRODUCT LISTS FOR NUBRAS GENTS ITEM'S SECTION"
+              name={`PRODUCT LISTS FOR NUBRAS GENTS ITEM'S SECTION ${selectedDate && `FOR ${selectedDate}`}`}
               data={products || []}
             />
             <SalesTable
-              name="DAILY TOTALS FOR NUBRAS GENTS ITEM'S SECTION"
+              name={`DAILY TOTALS FOR NUBRAS GENTS ITEM'S SECTION ${selectedDate && `FOR ${selectedDate}`}`}
               data={totals || []}
             />
             <SalesTable
-              name="MONTHLY TOTALS FOR NUBRAS GENTS ITEM'S SECTION"
+              name={`MONTHLY TOTALS FOR NUBRAS GENTS ITEM'S SECTION ${selectedDate && `FOR ${selectedDate}`}`}
               data={Monthlytotals || []}
             />
           </CardContent>
@@ -492,29 +520,27 @@ function Dashboard() {
         {paginatedCategoryData4.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle contentEditable className="max-w-max">
+              <CardTitle className="max-w-max font-bold text-teal-700">
                 NUBRAS GENTS JACKET SECTION
               </CardTitle>
-              <CardDescription contentEditable>
-                add your description here
-              </CardDescription>
+              <CardDescription>add your description here</CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-4">
               <SalesTable
-                name="DAILY SALES DATA FOR NUBRAS GENTS KANDORA SECTION"
+                name={`DAILY SALES DATA FOR NUBRAS GENTS KANDORA SECTION ${selectedDate && `FOR ${selectedDate}`}`}
                 data={paginatedCategoryData4 || []}
               />
               <SalesTable
-                name="PRODUCT LISTS FOR NUBRAS GENTS KANDORA SECTION"
+                name={`PRODUCT LISTS FOR NUBRAS GENTS KANDORA SECTION ${selectedDate && `FOR ${selectedDate}`}`}
                 data={products4 || []}
               />
               <SalesTable
-                name="DAILY TOTALS FOR NUBRAS GENTS KANDORA SECTION"
+                name={`DAILY TOTALS FOR NUBRAS GENTS KANDORA SECTION ${selectedDate && `FOR ${selectedDate}`}`}
                 data={totals4 || []}
               />
               <SalesTable
-                name="MONTHLY TOTALS FOR NUBRAS GENTS KANDORA SECTION"
+                name={`MONTHLY TOTALS FOR NUBRAS GENTS KANDORA SECTION ${selectedDate && `FOR ${selectedDate}`}`}
                 data={Monthlytotals4 || []}
               />
             </CardContent>
@@ -522,64 +548,107 @@ function Dashboard() {
         )}
         <Card>
           <CardHeader>
-            <CardTitle contentEditable className="max-w-max">
+            <CardTitle className="max-w-max font-bold text-teal-700">
               NUBRAS JUNIOR KID&apos;S SECTION
             </CardTitle>
-            <CardDescription contentEditable>
-              add your description here
-            </CardDescription>
+            <CardDescription>add your description here</CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
             <SalesTable
-              name="DAILY SALES DATA FOR NUBRAS JUNIOR KID'S SECTION"
+              name={`DAILY SALES DATA FOR NUBRAS JUNIOR KID'S SECTION ${selectedDate && `FOR ${selectedDate}`}`}
               data={paginatedCategoryData2 || []}
             />
             <SalesTable
-              name="PRODUCT LISTS FOR NUBRAS JUNIOR KID'S SECTION"
+              name={`PRODUCT LISTS FOR NUBRAS JUNIOR KID'S SECTION ${selectedDate && `FOR ${selectedDate}`}`}
               data={products2 || []}
             />
             <SalesTable
-              name="DAILY TOTALS FOR NUBRAS JUNIOR KID'S SECTION"
+              name={`DAILY TOTALS FOR NUBRAS JUNIOR KID'S SECTION ${selectedDate && `FOR ${selectedDate}`}`}
               data={totals2 || []}
             />
             <SalesTable
-              name="MONTHLY TOTALS FOR NUBRAS JUNIOR KID'S SECTION"
+              name={`MONTHLY TOTALS FOR NUBRAS JUNIOR KID'S SECTION ${selectedDate && `FOR ${selectedDate}`}`}
               data={Monthlytotals2 || []}
             />
           </CardContent>
         </Card>
 
-        <div className="space-y-6">
-          {/* <SalesTable name="NUBRAS GENTS JACKET SECTION" data={paginatedCategoryData4} /> */}
-          <MonthlySalesChart data={filteredMonthlyData} />
+        <Card className="">
+          <CardHeader>
+            <CardTitle className="max-w-max font-bold text-teal-700">
+              NEW ORDER PAYMENT FOR {selectedDate}
+            </CardTitle>
+            <CardDescription>add your description here</CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 space-y-2">
+            <SalesTable
+              name={`NEW ORDER PAYMENT ${selectedDate && `FOR ${selectedDate}`}`}
+              data={newOrders!.invoices || []}
+            />
+            <SalesTable
+              name={`TOTALS FOR NEW ORDER PAYMENT ${selectedDate && `FOR ${selectedDate}`}`}
+              data={newOrders!.totals || []}
+            />
+            <SalesTable
+              name={`MONTHLY TOTALS FOR NEW ORDER PAYMENT ${selectedDate && `FOR ${selectedDate}`}`}
+              data={newOrders!.monthTotals || []}
+            />
+          </CardContent>
+        </Card>
+        <Card className="">
+          <CardHeader>
+            <CardTitle className="max-w-max font-bold text-teal-700">
+              OLD ORDER PAYMENT FOR {selectedDate}
+            </CardTitle>
+            <CardDescription>add your description here</CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 space-y-2">
+            <SalesTable
+              name={`OLD ORDER PAYMENT ${selectedDate && `FOR ${selectedDate}`}`}
+              data={oldOrders!.invoices || []}
+            />
+            <SalesTable
+              name={`TOTALS FOR OLD ORDER PAYMENT ${selectedDate && `FOR ${selectedDate}`}`}
+              data={oldOrders!.totals || []}
+            />
+            <SalesTable
+              name={`MONTHLY TOTALS FOR OLD ORDER PAYMENT ${selectedDate && `FOR ${selectedDate}`}`}
+              data={oldOrders!.monthTotals || []}
+            />
+          </CardContent>
+        </Card>
+
+        <div className="space-y-4">
+      
           <SalesTable
-            name="MONTHLY SALES DATA"
-            data={filteredMonthlyData || []}
+            name={`MONTHLY SALES DATA ${yearSelected && `FOR ${yearSelected}-${monthSelected || ""}`}`}
+            data={monthlyData || []}
+          />
+        </div>
+        <div className="space-y-4">
+          <SalesTable
+            name={`QUARTERLY SALES DATA  ${yearSelected && `FOR ${yearSelected}-${quarterSelected || ""}`}`}
+            data={quarterlyData || []}
           />
         </div>
         <div className="space-y-6">
-          <QuarterlySalesChart data={filteredQuarterlyData} />
           <SalesTable
-            name="QUARTERLY SALES DATA"
-            data={filteredQuarterlyData || []}
-          />
-        </div>
-        <div className="space-y-6">
-          <HalfYearlySalesChart data={filteredHalfYearlyData} />
-          <SalesTable
-            name="HALF YEARLY SALES DATA"
-            data={filteredHalfYearlyData}
+            name={`HALF YEARLY SALES DATA  ${yearSelected && `FOR ${yearSelected}-${halfYearSelected || ""}`}`}
+            data={haflyData}
           />
         </div>
 
         <div className="space-y-6">
-          <YearlySalesChart data={filteredYearlyData} />
           <SalesTable
-            name="YEARLY SALES DATA"
-            data={filteredYearlyData || []}
+            name={`YEARLY SALES DATA  ${yearSelected && `FOR ${yearSelected}`}`}
+            data={yearlyData || []}
           />
         </div>
+            <MonthlySalesChart  name={`MONTHLY SALES DATA ${yearSelected && `FOR ${yearSelected}-${monthSelected || ""}`}`} data={monthlyData} />
+            <QuarterlySalesChart name={`QUARTERLY SALES DATA  ${yearSelected && `FOR ${yearSelected}-${quarterSelected || ""}`}`} data={quarterlyData} />
+            <HalfYearlySalesChart name={`HALF YEARLY SALES DATA  ${yearSelected && `FOR ${yearSelected}-${halfYearSelected || ""}`}`} data={haflyData} />
+            <YearlySalesChart name={`YEARLY SALES DATA  ${yearSelected && `FOR ${yearSelected}`}`} data={yearlyData} />
         {/* <CategoryChart data={paginatedCategoryData} /> */}
       </div>
     </div>

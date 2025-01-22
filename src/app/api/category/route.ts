@@ -3,6 +3,7 @@
 import client from "@/database";
 import { NextRequest } from "next/server";
 
+
 export async function POST(req: NextRequest) {
   try {
     // Parse the request body
@@ -129,17 +130,32 @@ export async function POST(req: NextRequest) {
       // Execute the totals query
       const MonthlytotalsResult = await pg.query(MonthlytotalsQuery, MonthlytotalsParams);
 
-      console.log("Query Result:", result.rows);
-      console.log("Products Query Result:", productsResult.rows);
-      console.log("Totals Query Result:", totalsResult.rows);
+    
 
       if (result.rows.length === 0) {
         return new Response("No data found", { status: 404 });
       }
 
+      const processedRows = result.rows.map(row => {
+        // Process the "Price/Pc" field
+        const price = row["Price/Pc"];
+        
+        // Remove commas and check if it's convertible to a number
+        const cleanedPrice = price.replace(/,/g, ""); // Remove commas
+        const numericPrice = Number(cleanedPrice);
+      
+        // Check if the price is a valid number
+        const priceValue = !isNaN(numericPrice) ? numericPrice : cleanedPrice.slice(6); // Convert if valid number, otherwise slice
+      
+        return {
+          ...row,
+          "Price/Pc": priceValue, // Assign the processed value
+        };
+      });
+
       return new Response(
         JSON.stringify({
-          data: result.rows,
+          data: processedRows,
           products: productsResult.rows,
           totals: totalsResult.rows,
           monthTotals: MonthlytotalsResult.rows

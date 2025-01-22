@@ -26,6 +26,16 @@ const Table = ({ data }: { data: DataRow[] }) => {
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
     useTable({ columns, data });
 
+  const getCellStyle = (value: string) => {
+    // Apply background color based on cell value
+    if (value === "OLD ORDER PAYMENT") {
+      return "bg-red-300"; // Light red
+    } else if (value === "NEW ORDER PAYMENT") {
+      return "bg-teal-300"; // Light teal
+    }
+    return ""; // No specific style for other values
+  };
+
   return (
     <div className="overflow-x-auto">
       <table
@@ -43,7 +53,7 @@ const Table = ({ data }: { data: DataRow[] }) => {
                   {...column.getHeaderProps()}
                   key={Math.random()}
                   className="text-xs font-medium py-2 px-1 bg-gray-200 text-center border border-gray-300"
-                  style={{ // Smaller padding
+                  style={{
                     width: `${100 / columns.length}%`, // Distribute column widths equally
                     whiteSpace: "nowrap", // Prevent wrapping
                   }}
@@ -69,14 +79,16 @@ const Table = ({ data }: { data: DataRow[] }) => {
                   <td
                     {...cell.getCellProps()}
                     key={Math.random()}
-                    className="text-xs py-1.5 px-1 text-center border border-gray-200"
-                    style={{ // Smaller padding
+                    className={`text-xs py-1.5 px-1 text-center border border-gray-200 ${
+                      getCellStyle(cell.value as string) // Apply the dynamic style here
+                    }`}
+                    style={{
                       whiteSpace: "nowrap", // Prevent wrapping
                       overflow: "hidden", // Hide overflowing text
                       textOverflow: "ellipsis", // Show ellipsis if text overflows
                     }}
                   >
-                    {cell.render("Cell")}
+                    {cell.render("Cell") === null ? "-" : cell.render("Cell")}
                   </td>
                 ))}
               </tr>
@@ -87,8 +99,6 @@ const Table = ({ data }: { data: DataRow[] }) => {
     </div>
   );
 };
-
-
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const SalesTable = ({ data, className, name="Sales Data Table", description="Sales data for the selected period" }: { data: any[]; className?: string, name?: string; description?: string}) => {
@@ -106,8 +116,8 @@ const SalesTable = ({ data, className, name="Sales Data Table", description="Sal
         <CardHeader className="p-4 flex flex-row justify-between items-center">
           <div>
 
-          <CardTitle contentEditable className="max-w-max">{name}</CardTitle>
-          <CardDescription contentEditable>{description}</CardDescription>
+          <CardTitle  className="max-w-max font-bold text-teal-700">{name}</CardTitle>
+          <CardDescription >{description}</CardDescription>
           </div>
           <Button
             onClick={exportToExcel}
