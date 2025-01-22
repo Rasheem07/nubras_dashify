@@ -30,7 +30,7 @@ export default function Totals() {
   ];
 
   return (
-    <div className="grid mt-[150px] min-h-64 gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3  p-6 bg-gray-100">
+    <div className="grid mt-[150px] min-h-64 gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3  p-6 ">
       {cardsData.map((card, index) => (
         <SalesCard
           key={index}
