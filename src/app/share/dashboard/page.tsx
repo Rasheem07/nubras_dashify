@@ -139,7 +139,13 @@ function Dashboard() {
       });
 
       const data = await response.json();
-      setmonthlyData(data.pop());
+      if (!monthSelected) {
+        const withoutlast = data.slice(0, data.length - 1);
+        console.log(withoutlast);
+        setmonthlyData(withoutlast);
+      } else {
+        setmonthlyData(data);
+      }
     };
     fetchMonthlyData();
     const fetchQuarterlyData = async () => {
@@ -154,7 +160,13 @@ function Dashboard() {
       });
 
       const data = await response.json();
-      setquarterlyData(data.pop());
+      if (!quarterSelected) {
+        const withoutlast = data.slice(0, data.length - 1);
+        console.log(withoutlast);
+        setquarterlyData(withoutlast);
+      } else {
+        setquarterlyData(data);
+      }
     };
     fetchQuarterlyData();
     const fetchHalflyData = async () => {
@@ -169,7 +181,13 @@ function Dashboard() {
       });
 
       const data = await response.json();
-      sethaflyData(data.pop());
+      if (!halfYearSelected) {
+        const withoutlast = data.slice(0, data.length - 1);
+        console.log(withoutlast);
+        sethaflyData(withoutlast);
+      } else {
+        setquarterlyData(data);
+      }
     };
     fetchHalflyData();
     const fetchYearlyData = async () => {
@@ -184,10 +202,16 @@ function Dashboard() {
       });
 
       const data = await response.json();
-      setyearlyData(data.pop());
+      if (!yearSelected) {
+        const withoutlast = data.slice(0, data.length - 1);
+        console.log(withoutlast);
+        setyearlyData(withoutlast);
+      } else {
+        setyearlyData(data);
+      }
     };
     fetchYearlyData();
-  }, [yearSelected]);
+  }, [yearSelected, monthSelected, quarterSelected, halfYearSelected]);
 
   useEffect(() => {
     if (!selectedDate) return; // Don't fetch data if selectedDate is not fully entered
@@ -671,64 +695,41 @@ function Dashboard() {
           <h1 className="text-2xl font-bold text-gray-800">
             All over Nubras Daily Sales dashboard
           </h1>
-          <p className="text-base font-sans">
-            Nubras sales dashboard
-          </p>
+          <p className="text-base font-sans">Nubras sales dashboard</p>
         </div>
         <Totals />
         <div className="space-y-4">
           <SalesTable
-            name={`MONTHLY SALES DATA ${
-              yearSelected && `FOR ${yearSelected}-${monthSelected || ""}`
-            }`}
+            name={`MONTHLY SALES DATA `}
             data={monthlyData || []}
           />
         </div>
         <div className="space-y-4">
           <SalesTable
-            name={`QUARTERLY SALES DATA  ${
-              yearSelected && `FOR ${yearSelected}-${quarterSelected || ""}`
-            }`}
+            name={`QUARTERLY SALES DATA  `}
             data={quarterlyData || []}
           />
         </div>
         <div className="space-y-6">
           <SalesTable
-            name={`HALF YEARLY SALES DATA  ${
-              yearSelected && `FOR ${yearSelected}-${halfYearSelected || ""}`
-            }`}
+            name={`HALF YEARLY SALES DATA `}
             data={haflyData}
           />
         </div>
 
         <div className="space-y-6">
-          <SalesTable
-            name={`YEARLY SALES DATA  ${yearSelected && `FOR ${yearSelected}`}`}
-            data={yearlyData || []}
-          />
+          <SalesTable name={`YEARLY SALES DATA  `} data={yearlyData || []} />
         </div>
-        <MonthlySalesChart
-          name={`MONTHLY SALES DATA ${
-            yearSelected && `FOR ${yearSelected}-${monthSelected || ""}`
-          }`}
-          data={monthlyData}
-        />
+        <MonthlySalesChart name={`MONTHLY SALES DATA `} data={monthlyData} />
         <QuarterlySalesChart
-          name={`QUARTERLY SALES DATA  ${
-            yearSelected && `FOR ${yearSelected}-${quarterSelected || ""}`
-          }`}
+          name={`QUARTERLY SALES DATA  `}
           data={quarterlyData}
         />
         <HalfYearlySalesChart
-          name={`HALF YEARLY SALES DATA  ${
-            yearSelected && `FOR ${yearSelected}-${halfYearSelected || ""}`
-          }`}
+          name={`HALF YEARLY SALES DATA  `}
           data={haflyData}
         />
-        <YearlySalesChart
-          name={`YEARLY SALES DATA  ${yearSelected && `FOR ${yearSelected}`}`}
-          data={yearlyData}
-        />
+        <YearlySalesChart name={`YEARLY SALES DATA  `} data={yearlyData} />
         {/* <CategoryChart data={paginatedCategoryData} /> */}
       </div>
     </div>
