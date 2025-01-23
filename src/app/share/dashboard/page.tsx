@@ -139,7 +139,7 @@ function Dashboard() {
       });
 
       const data = await response.json();
-      setmonthlyData(data);
+      setmonthlyData(data.pop());
     };
     fetchMonthlyData();
     const fetchQuarterlyData = async () => {
@@ -154,7 +154,7 @@ function Dashboard() {
       });
 
       const data = await response.json();
-      setquarterlyData(data);
+      setquarterlyData(data.pop());
     };
     fetchQuarterlyData();
     const fetchHalflyData = async () => {
@@ -169,7 +169,7 @@ function Dashboard() {
       });
 
       const data = await response.json();
-      sethaflyData(data);
+      sethaflyData(data.pop());
     };
     fetchHalflyData();
     const fetchYearlyData = async () => {
@@ -184,7 +184,7 @@ function Dashboard() {
       });
 
       const data = await response.json();
-      setyearlyData(data);
+      setyearlyData(data.pop());
     };
     fetchYearlyData();
   }, [yearSelected]);
