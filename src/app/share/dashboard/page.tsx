@@ -375,9 +375,9 @@ function Dashboard() {
         <div className="flex items-center justify-center w-full">
           <div className="flex flex-col items-center">
             <Image
-              src="/icons/full-logo.jpeg"
-              height={60}
-              width={80}
+              src="/full-logo.jpeg"
+              height={100}
+              width={150}
               quality={100}
               alt="Logo"
               className="aspect-auto mix-blend-difference"
@@ -453,10 +453,18 @@ function Dashboard() {
           />
         </div>
       </div>
+      <div className="space-y-4 p-6  pt-[200px]">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Nubras Daily Sales dashboard
+          </h1>
+          <p className="text-base font-sans">
+            Nubras sales dashboard for {selectedDate}
+          </p>
+        </div>
 
-      <TotalsForCurrent date={selectedDate as string} />
+        <TotalsForCurrent date={selectedDate as string} />
 
-      <div className="p-6  xl:space-y-0 gap-8 grid grid-cols-1 grid-flow-row 2xl:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="max-w-max font-bold text-teal-700">
@@ -657,7 +665,16 @@ function Dashboard() {
             />
           </CardContent>
         </Card>
-
+      </div>
+      <div className="p-6 xl:space-y-0 gap-8 grid grid-cols-1 grid-flow-row 2xl:grid-cols-2">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">
+            All over Nubras Daily Sales dashboard
+          </h1>
+          <p className="text-base font-sans">
+            Nubras sales dashboard
+          </p>
+        </div>
         <Totals />
         <div className="space-y-4">
           <SalesTable

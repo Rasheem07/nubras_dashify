@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
         visa_amount, 
         acount_transfer, 
         cash_amount, 
-        totals 
+        (visa_amount + acount_transfer + cash_amount) as "totals"  -- Calculate total in the query
       FROM "Nubras transactions"
       WHERE paid_date = $1 AND invoice_type = $2
     `;
@@ -33,30 +33,29 @@ export async function POST(req: NextRequest) {
       // Execute the main invoice query
       const result = await pg.query(query, params);
 
-      // Query for total sales and quantity
+      // Query for total sales and quantity (no type casting)
       let salesQuery = `
       SELECT 
-        SUM(CAST(visa_amount AS NUMERIC)) as "Total Visa Amount", 
-        SUM(CAST(acount_transfer AS NUMERIC)) as "Total Bank Transfer", 
-        SUM(CAST(cash_amount AS NUMERIC)) as "Total Cash Amount", 
-        SUM(CAST(totals AS NUMERIC)) as "Total amount"
+        SUM(visa_amount) as "Total Visa Amount", 
+        SUM(acount_transfer) as "Total Bank Transfer", 
+        SUM(cash_amount) as "Total Cash Amount", 
+        SUM(visa_amount + acount_transfer + cash_amount) as "Total amount" -- Calculate total in the query
       FROM "Nubras transactions"
       WHERE invoice_type = $1 AND paid_date = $2
     `;
-    
     
       let salesParams: any[] = [type, date];
 
       const salesResult = await pg.query(salesQuery, salesParams);
 
-      // Query for monthly aggregates based on the invoice type
+      // Query for monthly aggregates based on the invoice type (no type casting)
       let monthlyQuery = `
       SELECT 
         TO_CHAR(date_trunc('month', paid_date), 'YYYY-MM') as "Month",
-        SUM(CAST(visa_amount AS NUMERIC)) as "Total Visa Amount", 
-        SUM(CAST(acount_transfer AS NUMERIC)) as "Total Bank Transfer", 
-        SUM(CAST(cash_amount AS NUMERIC)) as "Total Cash Amount", 
-        SUM(CAST(totals AS NUMERIC)) as "Total amount"
+        SUM(visa_amount) as "Total Visa Amount", 
+        SUM(acount_transfer) as "Total Bank Transfer", 
+        SUM(cash_amount) as "Total Cash Amount", 
+        SUM(visa_amount + acount_transfer + cash_amount) as "Total amount" -- Calculate total in the query
       FROM "Nubras transactions"
       WHERE invoice_type = $1
     `;

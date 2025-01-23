@@ -10,22 +10,22 @@ export async function GET() {
         AVG(product_quantity) AS "Average Product Quantity",
         SUM(visa_payment) AS "Total Visa Payment",
         AVG(visa_payment) AS "Average Visa Payment",
-        SUM(bank_transfer_payment) AS "Total Bank Transfer Payment",
-        AVG(bank_transfer_payment) AS "Average Bank Transfer Payment",
+        SUM(bank__payment) AS "Total Bank Transfer Payment",
+        AVG(bank__payment) AS "Average Bank Transfer Payment",
         SUM(cash_payment) AS "Total Cash Payment",
         AVG(cash_payment) AS "Average Cash Payment",
-        SUM(advance_amount_payment) AS "Total Advance Amount Payment",
-        AVG(advance_amount_payment) AS "Average Advance Amount Payment",
-        SUM(total_amount_1) AS "Total Amount",
-        AVG(total_amount_1) AS "Average Amount",
+        SUM(advance_payment) AS "Total Advance Amount Payment",
+        AVG(advance_payment) AS "Average Advance Amount Payment",
+        SUM(total_amount) AS "Total Amount",
+        AVG(total_amount) AS "Average Amount",
         SUM(tax_amount) AS "Total Tax Amount",
         AVG(tax_amount) AS "Average Tax Amount",
         SUM(tax__) AS "Total Tax",
         AVG(tax__) AS "Average Tax",
         SUM(amount_excluding_tax) AS "Total Amount Excluding Tax",
         AVG(amount_excluding_tax) AS "Average Amount Excluding Tax",
-        SUM(balance_amount_1) AS "Total Balance Amount",
-        AVG(balance_amount_1) AS "Average Balance Amount"
+        SUM(balance_amount) AS "Total Balance Amount",
+        AVG(balance_amount) AS "Average Balance Amount"
       FROM nubras;
     `;
 

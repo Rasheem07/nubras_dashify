@@ -14,18 +14,18 @@ export async function POST(req: NextRequest) {
     let query = `
       SELECT 
         TO_CHAR(sale_order_date, 'YYYY-MM-DD') as "Date", 
-        nubras_product_list as "Items", 
-        sales_person_1 as "Salesman", 
+        product_list as "Items", 
+        sales_person as "Salesman", 
         product_quantity as "Qty", 
         product_price_pc as "Price/Pc", 
         visa_payment as "Visa Amount", 
-        bank_transfer_payment as "Bank Transfer Amount", 
+        bank__payment as "Bank Transfer Amount", 
         cash_payment as "Cash Amount", 
-        total_amount_1 as "Total Amount", 
-        balance_amount_1 as "Balance",
+        total_amount as "Total Amount", 
+        balance_amount as "Balance",
         order_payment_status as "Order Payment Status"
       FROM nubras
-      WHERE nubras_product_catogories = $1
+      WHERE product_categories = $1
     `;
 
     if (date && date !== "") {
@@ -48,11 +48,11 @@ export async function POST(req: NextRequest) {
 
       let productsQuery = `
         SELECT 
-          nubras_product_list, 
-          SUM(CAST(total_amount_1 AS NUMERIC)) as "Total Sales", 
+          product_list, 
+          SUM(CAST(total_amount AS NUMERIC)) as "Total Sales", 
           SUM(CAST(product_quantity AS NUMERIC)) as "Total Quantity"
         FROM nubras 
-        WHERE nubras_product_catogories = $1
+        WHERE product_categories = $1
       `;
       let productsParams: any[] = [category];
 
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
         productsParams.push(branch);
       }
 
-      productsQuery += ` GROUP BY nubras_product_list`;
+      productsQuery += ` GROUP BY product_list`;
 
       // Execute the product query
       const productsResult = await pg.query(productsQuery, productsParams);
@@ -75,12 +75,12 @@ export async function POST(req: NextRequest) {
         SELECT 
           SUM(product_quantity) as "Total Qty",
           SUM(visa_payment) as "Total Visa Amount",
-          SUM(bank_transfer_payment) as "Total Bank Transfer Amount",
+          SUM(bank__payment) as "Total Bank Transfer Amount",
           SUM(cash_payment) as "Total Cash Amount",
-          SUM(total_amount_1) as "Total Amount",
-          SUM(balance_amount_1) as "Total Balance"
+          SUM(total_amount) as "Total Amount",
+          SUM(balance_amount) as "Total Balance"
         FROM nubras
-        WHERE nubras_product_catogories = $1
+        WHERE product_categories = $1
       `;
       let totalsParams: any[] = [category];
 
@@ -102,12 +102,12 @@ export async function POST(req: NextRequest) {
         TO_CHAR(date_trunc('month', sale_order_date), 'YYYY-MM') as "Month",  -- Truncate to first day of the month and format
         SUM(product_quantity) as "Total Qty",
         SUM(visa_payment) as "Total Visa Amount",
-        SUM(bank_transfer_payment) as "Total Bank Transfer Amount",
+        SUM(bank__payment) as "Total Bank Transfer Amount",
         SUM(cash_payment) as "Total Cash Amount",
-        SUM(total_amount_1) as "Total Amount",
-        SUM(balance_amount_1) as "Total Balance"
+        SUM(total_amount) as "Total Amount",
+        SUM(balance_amount) as "Total Balance"
       FROM nubras
-      WHERE nubras_product_catogories = $1
+      WHERE product_categories = $1
     `;
     
     let MonthlytotalsParams: any[] = [category];

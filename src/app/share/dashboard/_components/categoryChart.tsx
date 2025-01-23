@@ -25,7 +25,7 @@ export default function CategoryChart({ data }: { data: any[] }) {
 
         <BarChart data={data} margin={{left: 20}}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="nubras_product_list" />
+          <XAxis dataKey="product_list" />
           <YAxis />
           <YAxis yAxisId={2} orientation="right" />
           <Tooltip />

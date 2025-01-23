@@ -8,16 +8,21 @@ export async function POST(req: NextRequest) {
     // Updated query with the capitalized aliases
     const query = `
       SELECT
-        nubras_product_catogories,
-        SUM(total_amount_1) AS "total_amount"
+        product_categories,
+        SUM(total_amount) AS "total_amount"
       FROM nubras
       where sale_order_date = '${date}'
-      group by nubras_product_catogories
+      group by product_categories
     `;
 
-    const { rows } = await client.query(query);
+    const paymentQuery = `SELECT invoice_type, SUM(CAST(totals AS NUMERIC)) as "total_amount"
+      FROM "Nubras transactions"  where paid_date = '${date}' group by invoice_type`;
 
-    return new Response(JSON.stringify(rows), { status: 200 });
+    const { rows } = await client.query(query);
+    const { rows: rows2 } = await client.query(paymentQuery);
+    return new Response(JSON.stringify({ category: rows, payment: rows2 }), {
+      status: 200,
+    });
   } catch (error) {
     console.error("Database query error", error);
     return new Response("An error occurred", { status: 500 });

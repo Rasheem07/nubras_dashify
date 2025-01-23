@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const { branch, year, month } = await req.json();
     let params: any[] = ["NUBRAS JUNIOR KID'S SECTION"];
 
-    let query = 'SELECT * FROM nubras WHERE nubras_product_catogories = $1';
+    let query = 'SELECT * FROM nubras WHERE product_categories = $1';
     
 
     // Conditionally add filters based on provided data

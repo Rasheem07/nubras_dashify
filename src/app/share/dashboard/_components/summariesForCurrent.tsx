@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import SalesCard from "./card";
 
 export default function TotalsForCurrent({ date }: { date: string }) {
-  const [salesData, setSalesData] = useState<any[]>([]);
+  const [salesData, setSalesData] = useState<{
+    category: any[];
+    payment: any[];
+  }>({ category: [], payment: [] });
 
   useEffect(() => {
     async function fetchSalesData() {
@@ -23,18 +26,30 @@ export default function TotalsForCurrent({ date }: { date: string }) {
   if (!salesData) return <p>Loading...</p>;
 
   return (
-    <div className="space-y-4 mt-[150px] p-6">
+    <div className="space-y-4">
       <h1 className="text-2xl font-bold text-teal-900">
         Summaries for all categories
       </h1>
       <div className="grid min-h-32 gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 ">
-        {salesData.map((card, index) => {
-          return card.nubras_product_catogories !== null ? (
+        {salesData.category.map((card, index) => {
+          return card.product_categories !== null ? (
             <SalesCard
               key={index}
-              name={card.nubras_product_catogories}
+              name={card.product_categories}
               total={card.total_amount}
-              title={`Total of ${card.nubras_product_catogories}`}
+              title={`Total of ${card.product_categories}`}
+            />
+          ) : null;
+        })}
+      </div>
+      <div className="grid min-h-32 gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 ">
+        {salesData.payment.map((card, index) => {
+          return card.product_categories !== null ? (
+            <SalesCard
+              key={index}
+              name={card.invoice_type}
+              total={card.total_amount}
+              title={`Total of ${card.invoice_type}`}
             />
           ) : null;
         })}

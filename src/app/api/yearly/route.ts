@@ -9,9 +9,9 @@ export async function POST(req: NextRequest) {
     SELECT 
       EXTRACT(YEAR FROM sale_order_date) AS year,
       COUNT(*) AS total_orders,
-      ROUND(CAST(AVG(total_amount_1) AS NUMERIC), 2) AS "Average sales amount",
-      ROUND(CAST(SUM(total_amount_1) AS NUMERIC), 2) AS "Total sales amount",
-      ROUND(CAST(SUM(balance_amount_1) AS NUMERIC), 2) AS "Total balance amount"
+      ROUND(CAST(AVG(total_amount) AS NUMERIC), 2) AS "Average sales amount",
+      ROUND(CAST(SUM(total_amount) AS NUMERIC), 2) AS "Total sales amount",
+      ROUND(CAST(SUM(balance_amount) AS NUMERIC), 2) AS "Total balance amount"
     FROM nubras
   `;
 
