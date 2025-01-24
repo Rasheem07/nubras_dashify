@@ -30,7 +30,7 @@ export default function Totals() {
   ];
 
   return (
-    <div className="space-y-4 ">
+    <div className="space-y-4 p-6">
       <h1 className="text-2xl font-bold text-teal-900">
         Summaries from 2021 to 2025
       </h1>
