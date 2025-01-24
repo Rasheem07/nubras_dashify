@@ -1,8 +1,9 @@
 // pages/dashboard.js
 import { useEffect, useState } from 'react';
 import SalesCard from './card';
+import CategorySummary from './categoriesSummary';
 
-export default function Totals() {
+export default function Totals({date}: {date: string}) {
   const [salesData, setSalesData] = useState(null);
 
   useEffect(() => {
@@ -45,6 +46,7 @@ export default function Totals() {
           title2={`Average of ${card.name}`}
         />
       ))}
+      <CategorySummary date={date}/>
     </div>
     </div>
   );

@@ -412,6 +412,7 @@ function Dashboard() {
     fetchProducts();
   }, []);
 
+  
   return (
     <div className="w-full" id="container">
       <div className="bg-white z-10 p-4 pb-0 fixed top-0 w-full border-b border-gray-300">
@@ -732,7 +733,7 @@ function Dashboard() {
         </Card>
       </div>
       <div className="p-6 space-y-4">
-        <Totals />
+        <Totals date={selectedDate as string} />
         <SalesTable
           name={`All over sales for nubras product lists`}
           description="All over total quantity sold, total sales amount and
