@@ -30,9 +30,9 @@ export default function Totals() {
   ];
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 ">
       <h1 className="text-2xl font-bold text-teal-900">
-        Summaries from 2021 to 2025
+        Summaries from 2021 to 2025 (Sales book data)
       </h1>
     <div className="grid  min-h-64 gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
       {cardsData.map((card, index) => (

@@ -96,6 +96,39 @@ export async function POST(req: NextRequest) {
 
       // Execute the totals query
       const totalsResult = await pg.query(totalsQuery, totalsParams);
+      let MonthlyProducttotalsParams: any[] = [category];
+
+      let MonthlyProducttotalsQuery = `
+      SELECT 
+        TO_CHAR(date_trunc('month', sale_order_date), 'YYYY-MM') as "Month", -- Truncate to first day of the month and format
+        product_list,
+        SUM(product_quantity) as "Total Qty",
+        SUM(visa_payment) as "Total Visa Amount",
+        SUM(bank__payment) as "Total Bank Transfer Amount",
+        SUM(cash_payment) as "Total Cash Amount",
+        SUM(total_amount) as "Total Amount",
+        SUM(balance_amount) as "Total Balance"
+      FROM nubras
+      WHERE product_categories = $1
+    `;
+    
+    
+    if (date && date !== "") {
+      MonthlyProducttotalsQuery += ` AND EXTRACT(YEAR FROM sale_order_date) = EXTRACT(YEAR FROM $${MonthlyProducttotalsParams.length + 1}::DATE)`;
+      MonthlyProducttotalsQuery += ` AND EXTRACT(MONTH FROM sale_order_date) = EXTRACT(MONTH FROM $${MonthlyProducttotalsParams.length + 1}::DATE)`;
+      MonthlyProducttotalsParams.push(date); // Push the date to the parameters array
+    }
+    
+    if (branch && branch !== "") {
+      MonthlyProducttotalsQuery += ` AND nubras_branch = $${MonthlyProducttotalsParams.length + 1}`;
+      MonthlyProducttotalsParams.push(branch);
+    }
+    
+    MonthlyProducttotalsQuery += ` GROUP BY date_trunc('month', sale_order_date), product_list`;
+    
+
+    
+    const productsMonthlyTotals = await pg.query(MonthlyProducttotalsQuery, MonthlyProducttotalsParams);
 
       let MonthlytotalsQuery = `
       SELECT 
@@ -158,7 +191,8 @@ export async function POST(req: NextRequest) {
           data: processedRows,
           products: productsResult.rows,
           totals: totalsResult.rows,
-          monthTotals: MonthlytotalsResult.rows
+          monthTotals: MonthlytotalsResult.rows,
+          ProductsMonthly: productsMonthlyTotals.rows
         }),
         { status: 200 }
       );

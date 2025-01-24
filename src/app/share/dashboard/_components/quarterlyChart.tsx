@@ -1,26 +1,26 @@
 import React from "react";
 import {
   ResponsiveContainer,
-  BarChart,
+  ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
-  LabelList,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const QuarterlySalesChart = ({ data, name }: { data: any[]; name: string }) => {
-  // Calculate dynamic maximum value across all datasets
+const HorizontalComposedChart = ({ data, name }: { data: any[]; name: string }) => {
+  // Calculate dynamic maximum values for each axis
   const maxTotalSales = Math.max(...data.map((item) => item["Total sales amount"] || 0));
-  const maxAverageSales = Math.max(...data.map((item) => item["Average sales amount"] || 0));
   const maxTotalOrders = Math.max(...data.map((item) => item["total_orders"] || 0));
 
-  // Determine the highest maximum and add a margin for better visualization
-  const maxRange = Math.max(maxTotalSales, maxAverageSales, maxTotalOrders) * 1.1; // Add 10% margin
+  // Determine the highest maximum and add margins for better visualization
+  const maxSalesRange = maxTotalSales * 1.1; // 10% margin for sales
+  const maxOrdersRange = maxTotalOrders * 1.1; // 10% margin for orders
 
   return (
     <Card>
@@ -28,64 +28,69 @@ const QuarterlySalesChart = ({ data, name }: { data: any[]; name: string }) => {
         <CardTitle>{name}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer
-          width="100%"
-          height={data.length > 4 && data.length < 8 ? 1200 : data.length > 8 ? 2000 : 400}
-        >
-          <BarChart
-            layout="vertical"
-            barGap={5} // Adjust spacing between bars within a group
-            barCategoryGap={80} // Increase spacing between groups of bars
+        <ResponsiveContainer width="100%" height={400}>
+          <ComposedChart
+            layout="horizontal"
             data={data}
-            margin={{ top: 20, right: 50, left: 20, bottom: 20 }}
+            margin={{ top: 20, right: 50, left: 50, bottom: 20 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
 
-            {/* Single X-Axis with Dynamic Range */}
-            <XAxis
-              type="number"
-              domain={[0, maxRange]} // Dynamically set the domain
-              tickFormatter={(value) => value.toLocaleString()} // Format numbers
-            />
-            <XAxis
-              type="number"
-              xAxisId={2}
-              orientation="top"
-              domain={[0, maxRange ]} // Dynamically set the domain
-              tickFormatter={(value) => value.toLocaleString()} // Format numbers
+            {/* X-Axis */}
+            <XAxis dataKey="quarter_year" tickLine={false} />
+
+            {/* Y-Axis for Total Sales */}
+            <YAxis
+              yAxisId="left"
+              orientation="left"
+              domain={[0, maxSalesRange]}
+              tickFormatter={(value) => `$${value.toLocaleString()}`}
             />
 
-            <YAxis type="category" dataKey="quarter_year" />
+            {/* Y-Axis for Total Orders */}
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              domain={[0, maxOrdersRange]}
+              tickFormatter={(value) => value.toLocaleString()}
+            />
+
             <Tooltip />
             <Legend />
 
-            {/* Bars */}
-            <Bar dataKey="Total sales amount" fill="#8884d8" name="Total Sales" barSize={20}>
-              <LabelList
-                dataKey="Total sales amount"
-                position="right"
-                style={{ fill: "#8884d8", fontWeight: "500", fontSize: "14px" }} // Medium font
-              />
-            </Bar>
-            <Bar xAxisId={2} dataKey="Average sales amount" fill="#82ca9d" name="Average Sale" barSize={20}>
-              <LabelList
-                dataKey="Average sales amount"
-                position="right"
-                style={{ fill: "#82ca9d", fontWeight: "500", fontSize: "14px" }} // Medium font
-              />
-            </Bar>
-            <Bar xAxisId={2} dataKey="total_orders" fill="#ffc658" name="Sale Count" barSize={20}>
-              <LabelList
-                dataKey="total_orders"
-                position="right"
-                style={{ fill: "#ffc658", fontWeight: "500", fontSize: "14px" }} // Medium font
-              />
-            </Bar>
-          </BarChart>
+            {/* Bars for Total Sales */}
+            <Bar
+              yAxisId="left"
+              dataKey="Total sales amount"
+              fill="#8884d8"
+              name="Total Sales"
+              barSize={20}
+            />
+
+            {/* Line for Total Orders */}
+            <Line
+              yAxisId="right"
+              dataKey="total_orders"
+              stroke="#ffc658"
+              name="Total Orders"
+              strokeWidth={2}
+              dot={{ r: 5 }}
+            />
+
+            {/* Line for Average Sales */}
+            <Line
+              yAxisId="left"
+              dataKey="Average sales amount"
+              stroke="#82ca9d"
+              name="Average Sale"
+              strokeWidth={2}
+              dot={{ r: 5 }}
+            />
+          </ComposedChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
   );
 };
 
-export default QuarterlySalesChart;
+export default HorizontalComposedChart;

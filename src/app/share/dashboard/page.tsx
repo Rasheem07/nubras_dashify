@@ -253,6 +253,10 @@ function Dashboard() {
   }, [selectedDate]);
 
   // Fetch data from API based on selected filters
+  const [productMonthly, setproductMonthly] = useState([]);
+  const [productMonthly2, setproductMonthly2] = useState([]);
+  const [productMonthly3, setproductMonthly3] = useState([]);
+  const [productMonthly4, setproductMonthly4] = useState([]);
   useEffect(() => {
     if (!selectedDate) return; // Don't fetch data if selectedDate is not fully entered
     const fetchData = async () => {
@@ -279,6 +283,7 @@ function Dashboard() {
       setproducts(data.products); // Update state with fetched data
       settotals(data.totals); // Update state with fetched data
       setMonthlytotals(data.monthTotals); // Update state with fetched data
+      setproductMonthly(data.ProductsMonthly);
     };
     fetchData();
     const fetchData2 = async () => {
@@ -305,6 +310,7 @@ function Dashboard() {
       setproducts2(data.products); // Update state with fetched data
       settotals2(data.totals); // Update state with fetched data
       setMonthlytotals2(data.monthTotals); // Update state with fetched data
+      setproductMonthly2(data.ProductsMonthly);
     };
     fetchData2();
     const fetchData3 = async () => {
@@ -331,6 +337,7 @@ function Dashboard() {
       setproducts3(data.products); // Update state with fetched data
       settotals3(data.totals); // Update state with fetched data
       setMonthlytotals3(data.monthTotals); // Update state with fetched data
+      setproductMonthly3(data.ProductsMonthly);
     };
     fetchData3();
     const fetchData4 = async () => {
@@ -357,6 +364,7 @@ function Dashboard() {
       setproducts4(data.products); // Update state with fetched data
       settotals4(data.totals); // Update state with fetched data
       setMonthlytotals4(data.monthTotals);
+      setproductMonthly4(data.ProductsMonthly);
     };
     fetchData4();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -395,7 +403,6 @@ function Dashboard() {
   const paginatedCategoryData4 = categoryData4;
 
   const [productsDATA, setproductsDATA] = useState([]);
-  const [CurrentproductsDATA, setCurrentproductsDATA] = useState([]);
   useEffect(() => {
     const fetchProducts = async () => {
       const response = await fetch("/api/products");
@@ -403,12 +410,6 @@ function Dashboard() {
       setproductsDATA(data);
     };
     fetchProducts();
-    const fetchCurrentProducts = async () => {
-      const response = await fetch("/api/products/current");
-      const data = await response.json();
-      setCurrentproductsDATA(data);
-    };
-    fetchCurrentProducts();
   }, []);
 
   return (
@@ -496,19 +497,6 @@ function Dashboard() {
         </div>
       </div>
       <div className="space-y-8 p-6  pt-[200px]">
-       
-        <div className="space-y-6">
-        
-        <h1 className="text-2xl font-bold py-2 text-teal-900">
-            Summaries for all product lists <span className="text-lg text-zinc-700 font-medium">(based on current month)</span>
-          </h1>
-          <SalesTable
-            name={`OnGoing nubras product list sales`}
-            description="Current month's total quantity sold, total sales amount and
-                average sales amount"
-            data={CurrentproductsDATA || []}
-          />
-        </div>
         <div>
           <h1 className="text-2xl pt-4 text-teal-900 font-bold ">
             Nubras Daily Sales dashboard
@@ -517,7 +505,7 @@ function Dashboard() {
             Nubras sales dashboard for {selectedDate}
           </p>
         </div>
-          <TotalsForCurrent date={selectedDate as string} />
+        <TotalsForCurrent date={selectedDate as string} />
         <Card>
           <CardHeader>
             <CardTitle className="max-w-max font-bold text-teal-700">
@@ -544,6 +532,12 @@ function Dashboard() {
                 selectedDate && `FOR ${selectedDate}`
               }`}
               data={totals3 || []}
+            />
+            <SalesTable
+              name={`MONTHLY TOTALS FOR PRODUCT LISTS ${
+                selectedDate && `FOR ${selectedDate}`
+              }`}
+              data={productMonthly3 || []}
             />
             <SalesTable
               name={`MONTHLY TOTALS FOR NUBRAS GENTS KANDORA SECTION ${
@@ -579,6 +573,12 @@ function Dashboard() {
                 selectedDate && `FOR ${selectedDate}`
               }`}
               data={totals || []}
+            />
+            <SalesTable
+              name={`MONTHLY TOTALS FOR PRODUCT LISTS ${
+                selectedDate && `FOR ${selectedDate}`
+              }`}
+              data={productMonthly || []}
             />
             <SalesTable
               name={`MONTHLY TOTALS FOR NUBRAS GENTS ITEM'S SECTION ${
@@ -618,6 +618,12 @@ function Dashboard() {
                 data={totals4 || []}
               />
               <SalesTable
+                name={`MONTHLY TOTALS FOR PRODUCT LISTS ${
+                  selectedDate && `FOR ${selectedDate}`
+                }`}
+                data={productMonthly4 || []}
+              />
+              <SalesTable
                 name={`MONTHLY TOTALS FOR NUBRAS GENTS KANDORA SECTION ${
                   selectedDate && `FOR ${selectedDate}`
                 }`}
@@ -652,6 +658,12 @@ function Dashboard() {
                 selectedDate && `FOR ${selectedDate}`
               }`}
               data={totals2 || []}
+            />
+            <SalesTable
+              name={`MONTHLY TOTALS FOR PRODUCT LISTS ${
+                selectedDate && `FOR ${selectedDate}`
+              }`}
+              data={productMonthly2 || []}
             />
             <SalesTable
               name={`MONTHLY TOTALS FOR NUBRAS JUNIOR KID'S SECTION ${
@@ -718,23 +730,27 @@ function Dashboard() {
             />
           </CardContent>
         </Card>
-        
       </div>
-      <Totals />
+      <div className="p-6 space-y-4">
+        <Totals />
+        <SalesTable
+          name={`All over sales for nubras product lists`}
+          description="All over total quantity sold, total sales amount and
+          average sales amount"
+          data={productsDATA || []}
+        />
+      </div>
       <div className="p-6 xl:space-y-0 gap-8 grid grid-cols-1 grid-flow-row 2xl:grid-cols-2">
         <div>
           <h1 className="text-3xl font-bold text-teal-900">
-            All over Nubras Daily Sales dashboard  <span className="text-lg text-zinc-700 font-medium">(from 2017 to 2025)</span>
+            All over Nubras Daily Sales dashboard{" "}
+            <span className="text-lg text-zinc-700 font-medium">
+              (from 2017 to 2025 Daily book data)
+            </span>
           </h1>
           <p className="text-base font-sans">Nubras sales dashboard</p>
         </div>
         <Totals17 />
-        <SalesTable
-          name={`All over sales for nubras product lists`}
-          description="All over total quantity sold, total sales amount and
-             average sales amount"
-          data={productsDATA || []}
-        />
         <div className="space-y-4">
           <SalesTable name={`MONTHLY SALES DATA `} data={monthlyData || []} />
         </div>
