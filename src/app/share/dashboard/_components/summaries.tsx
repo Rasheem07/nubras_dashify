@@ -30,7 +30,7 @@ export default function Totals() {
   ];
 
   return (
-    <div className="space-y-4  p-6">
+    <div className="space-y-4 ">
       <h1 className="text-2xl font-bold text-teal-900">
         Summaries for All Sales
       </h1>

@@ -88,7 +88,7 @@ const Table = ({ data }: { data: DataRow[] }) => {
                       textOverflow: "ellipsis", // Show ellipsis if text overflows
                     }}
                   >
-                    {cell.render("Cell") === null ? "-" : cell.render("Cell")}
+                    {cell.value == null || cell.value === "" ? "-" : cell.render("Cell")}
                   </td>
                 ))}
               </tr>

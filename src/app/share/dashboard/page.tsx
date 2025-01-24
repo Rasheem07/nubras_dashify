@@ -393,6 +393,23 @@ function Dashboard() {
   const paginatedCategoryData3 = categoryData3;
   const paginatedCategoryData4 = categoryData4;
 
+  const [productsDATA, setproductsDATA] = useState([]);
+  const [CurrentproductsDATA, setCurrentproductsDATA] = useState([]);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const response = await fetch("/api/products");
+      const data = await response.json();
+      setproductsDATA(data);
+    };
+    fetchProducts();
+    const fetchCurrentProducts = async () => {
+      const response = await fetch("/api/products/current");
+      const data = await response.json();
+      setCurrentproductsDATA(data);
+    };
+    fetchCurrentProducts();
+  }, []);
+
   return (
     <div className="w-full" id="container">
       <div className="bg-white z-10 p-4 pb-0 fixed top-0 w-full border-b border-gray-300">
@@ -477,18 +494,29 @@ function Dashboard() {
           />
         </div>
       </div>
-      <div className="space-y-4 p-6  pt-[200px]">
+      <div className="space-y-8 p-6  pt-[200px]">
+       
+        <div className="space-y-6">
+        
+        <h1 className="text-2xl font-bold py-2 text-teal-900">
+            Summaries for all product lists <span className="text-lg text-zinc-700 font-medium">(based on current month)</span>
+          </h1>
+          <SalesTable
+            name={`OnGoing nubras product list sales`}
+            description="Current month's total quantity sold, total sales amount and
+                average sales amount"
+            data={CurrentproductsDATA || []}
+          />
+        </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-2xl pt-4 text-teal-900 font-bold ">
             Nubras Daily Sales dashboard
           </h1>
           <p className="text-base font-sans">
             Nubras sales dashboard for {selectedDate}
           </p>
         </div>
-
-        <TotalsForCurrent date={selectedDate as string} />
-
+          <TotalsForCurrent date={selectedDate as string} />
         <Card>
           <CardHeader>
             <CardTitle className="max-w-max font-bold text-teal-700">
@@ -689,20 +717,24 @@ function Dashboard() {
             />
           </CardContent>
         </Card>
+        
       </div>
       <div className="p-6 xl:space-y-0 gap-8 grid grid-cols-1 grid-flow-row 2xl:grid-cols-2">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-3xl font-bold text-teal-900">
             All over Nubras Daily Sales dashboard
           </h1>
           <p className="text-base font-sans">Nubras sales dashboard</p>
         </div>
         <Totals />
+        <SalesTable
+          name={`All over sales for nubras product lists`}
+          description="All over total quantity sold, total sales amount and
+             average sales amount"
+          data={productsDATA || []}
+        />
         <div className="space-y-4">
-          <SalesTable
-            name={`MONTHLY SALES DATA `}
-            data={monthlyData || []}
-          />
+          <SalesTable name={`MONTHLY SALES DATA `} data={monthlyData || []} />
         </div>
         <div className="space-y-4">
           <SalesTable
@@ -711,10 +743,7 @@ function Dashboard() {
           />
         </div>
         <div className="space-y-6">
-          <SalesTable
-            name={`HALF YEARLY SALES DATA `}
-            data={haflyData}
-          />
+          <SalesTable name={`HALF YEARLY SALES DATA `} data={haflyData} />
         </div>
 
         <div className="space-y-6">
