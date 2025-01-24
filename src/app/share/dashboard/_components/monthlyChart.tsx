@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import {
   AreaChart,
@@ -12,7 +11,17 @@ import {
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-const MonthlySalesChart = ({data, name}: {data: any[], name: string}) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const MonthlySalesChart = ({ data, name }: { data: any[]; name: string }) => {
+  // Calculate the max values dynamically
+  const maxTotalSales = Math.max(...data.map((item) => item["Total sales amount"] || 0));
+  const maxTotalOrders = Math.max(...data.map((item) => item["total_orders"] || 0));
+
+  // Add a margin to the maximum value for better visualization
+  const margin = 10; // Adjust margin as needed
+  const maxSalesWithMargin = maxTotalSales + margin;
+  const maxOrdersWithMargin = maxTotalOrders + margin;
+
   return (
     <Card>
       <CardHeader>
@@ -24,8 +33,19 @@ const MonthlySalesChart = ({data, name}: {data: any[], name: string}) => {
           <AreaChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month_year" />
-            <YAxis yAxisId={1} />
-            <YAxis yAxisId={2} orientation="right" />
+            {/* Y-Axis for Total sales and Average sales */}
+            <YAxis
+              yAxisId={1}
+              domain={[0, maxSalesWithMargin]} // Dynamic domain based on calculated max
+              tickFormatter={(value) => value.toLocaleString()} // Format for readability
+            />
+            {/* Y-Axis for Total orders */}
+            <YAxis
+              yAxisId={2}
+              orientation="right"
+              domain={[0, maxOrdersWithMargin]} // Dynamic domain based on calculated max
+              tickFormatter={(value) => value.toLocaleString()} // Format for readability
+            />
             <Tooltip />
             <Legend />
             <Area

@@ -13,7 +13,16 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const YearlySalesChart = ({data, name}: {data: any[], name: string}) => {
+const YearlySalesChart = ({ data, name }: { data: any[]; name: string }) => {
+  // Calculate dynamic maximum values
+  const maxTotalSales = Math.max(...data.map((item) => item["Total sales amount"] || 0));
+  const maxAverageSales = Math.max(...data.map((item) => item["Average sales amount"] || 0));
+  const maxTotalOrders = Math.max(...data.map((item) => item["total_orders"] || 0));
+
+  // Add margin for better visualization
+  const maxLeftAxis = maxTotalSales * 1.1; // Left Y-Axis (Total Sales)
+  const maxRightAxis = Math.max(maxAverageSales, maxTotalOrders) * 1.1; // Right Y-Axis (Average Sales & Sale Count)
+
   return (
     <Card>
       <CardHeader>
@@ -27,15 +36,22 @@ const YearlySalesChart = ({data, name}: {data: any[], name: string}) => {
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" />
-            <YAxis yAxisId="left" tickFormatter={(value) => `${value / 1000}k`} />
+            {/* Dynamic Left Y-Axis */}
+            <YAxis
+              yAxisId="left"
+              domain={[0, maxLeftAxis]}
+              tickFormatter={(value) => `${value / 1000}k`}
+            />
+            {/* Dynamic Right Y-Axis */}
             <YAxis
               yAxisId="right"
               orientation="right"
-              tickFormatter={(value) => `${value}`}
+              domain={[0, maxRightAxis]}
+              tickFormatter={(value) => value.toLocaleString()}
             />
             <Tooltip />
             <Legend />
-            
+
             {/* Bar for Total Sales */}
             <Bar
               yAxisId="left"
@@ -44,7 +60,7 @@ const YearlySalesChart = ({data, name}: {data: any[], name: string}) => {
               fill="#8884d8"
               barSize={20}
             />
-            
+
             {/* Line for Average Sale */}
             <Line
               yAxisId="right"
@@ -55,7 +71,7 @@ const YearlySalesChart = ({data, name}: {data: any[], name: string}) => {
               strokeWidth={2}
               dot={{ r: 4 }}
             />
-            
+
             {/* Line for Sale Count */}
             <Line
               yAxisId="right"

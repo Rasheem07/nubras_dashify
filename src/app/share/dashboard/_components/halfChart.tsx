@@ -13,7 +13,16 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const HalfYearlySalesChart = ({data, name}: {data: any[], name: string}) => {
+const HalfYearlySalesChart = ({ data, name }: { data: any[]; name: string }) => {
+  // Calculate dynamic maximum values
+  const maxTotalSales = Math.max(...data.map((item) => item["Total sales amount"] || 0));
+  const maxAverageSales = Math.max(...data.map((item) => item["Average sales amount"] || 0));
+  const maxTotalOrders = Math.max(...data.map((item) => item["total_orders"] || 0));
+
+  // Add margin for better visualization
+  const maxLeftAxis = Math.max(maxAverageSales, maxTotalOrders) * 1.1; // Left Y-Axis (Average Sales & Sale Count)
+  const maxRightAxis = maxTotalSales * 1.1; // Right Y-Axis (Total Sales)
+
   return (
     <Card>
       <CardHeader>
@@ -24,8 +33,19 @@ const HalfYearlySalesChart = ({data, name}: {data: any[], name: string}) => {
           <ComposedChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="half_year" />
-            <YAxis yAxisId="left" />
-            <YAxis yAxisId="right" orientation="right" />
+            {/* Dynamic Left Y-Axis */}
+            <YAxis
+              yAxisId="left"
+              domain={[0, maxLeftAxis]}
+              tickFormatter={(value) => value.toLocaleString()} // Format numbers
+            />
+            {/* Dynamic Right Y-Axis */}
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              domain={[0, maxRightAxis]}
+              tickFormatter={(value) => value.toLocaleString()} // Format numbers
+            />
             <Tooltip />
             <Legend />
             {/* Bar for Sale Count */}

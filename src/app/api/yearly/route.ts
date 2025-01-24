@@ -7,21 +7,21 @@ export async function POST(req: NextRequest) {
 
   let query = `
     SELECT 
-      EXTRACT(YEAR FROM sale_order_date) AS year,
+      EXTRACT(YEAR FROM sale_date) AS year,
       COUNT(*) AS total_orders,
       ROUND(CAST(AVG(total_amount) AS NUMERIC), 2) AS "Average sales amount",
       ROUND(CAST(SUM(total_amount) AS NUMERIC), 2) AS "Total sales amount",
       ROUND(CAST(SUM(balance_amount) AS NUMERIC), 2) AS "Total balance amount"
-    FROM nubras
+    FROM "nubras customer"
   `;
 
   if (year && year !== "") {
-    query += " WHERE EXTRACT(YEAR FROM sale_order_date) = $1";
+    query += " WHERE EXTRACT(YEAR FROM sale_date) = $1";
   }
 
   query += `
-    GROUP BY EXTRACT(YEAR FROM sale_order_date)
-    ORDER BY EXTRACT(YEAR FROM sale_order_date)
+    GROUP BY EXTRACT(YEAR FROM sale_date)
+    ORDER BY EXTRACT(YEAR FROM sale_date)
   `;
 
   const pg = await client.connect();

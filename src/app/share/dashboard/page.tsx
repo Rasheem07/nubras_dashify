@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import Totals from "./_components/summaries";
 import TotalsForCurrent from "./_components/summariesForCurrent";
+import Totals17 from "./_components/summaries17";
 export default function ShareDashboard() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -719,14 +720,15 @@ function Dashboard() {
         </Card>
         
       </div>
+      <Totals />
       <div className="p-6 xl:space-y-0 gap-8 grid grid-cols-1 grid-flow-row 2xl:grid-cols-2">
         <div>
           <h1 className="text-3xl font-bold text-teal-900">
-            All over Nubras Daily Sales dashboard
+            All over Nubras Daily Sales dashboard  <span className="text-lg text-zinc-700 font-medium">(from 2017 to 2025)</span>
           </h1>
           <p className="text-base font-sans">Nubras sales dashboard</p>
         </div>
-        <Totals />
+        <Totals17 />
         <SalesTable
           name={`All over sales for nubras product lists`}
           description="All over total quantity sold, total sales amount and
