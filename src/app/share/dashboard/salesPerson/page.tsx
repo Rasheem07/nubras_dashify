@@ -3,10 +3,6 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation"; // Import useSearchParams from Next.js
 import SalesTable from "@/app/dashboards/_components/salesTable";
-import MonthlySalesChart from "./_components/monthlyChart";
-import QuarterlySalesChart from "./_components/quarterlyChart";
-import HalfYearlySalesChart from "./_components/halfChart";
-import YearlySalesChart from "./_components/yearlyChart";
 import Image from "next/image";
 import {
   Card,
@@ -15,9 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Totals from "./_components/summaries";
-import TotalsForCurrent from "./_components/summariesForCurrent";
-import Totals17 from "./_components/summaries17";
+import TotalsForCurrent from "../_components/summariesForCurrent";
+import Totals from "../_components/summaries";
+import Totals17 from "../_components/summaries17";
+import MonthlySalesChart from "../_components/monthlyChart";
+import QuarterlySalesChart from "../_components/quarterlyChart";
+import HalfYearlySalesChart from "../_components/halfChart";
+import YearlySalesChart from "../_components/yearlyChart";
 export default function ShareDashboard() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
