@@ -16,74 +16,72 @@ export default function Customers() {
   const [groupIdData, setgroupIdData] = useState<any[]>([]);
 
   useEffect(() => {
-   if(groupId === "" && phoneNumber === "") {
-      
+    if (groupId === "" && phoneNumber === "") {
       (async () => {
-      try {
-        // Fetch data with filters
-        const response = await fetch("/api/customer/count", {
-          method: "POST",
-          body: JSON.stringify({
-            year,
-            group_id: groupId,
-            phone_number: phoneNumber,
-            min_total: minTotal,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        
-        const json = await response.json();
-
-        // Check if the response is an array
-        if (Array.isArray(json)) {
-          setCustomersCount(json);
-        } else {
-           console.error("Expected an array but received:", json);
-           setCustomersCount([]); // Set to empty array if the response is not an array
-         }
-      } catch (error) {
-         console.error("Error fetching customer data:", error);
-        setCustomersCount([]); // Set to empty array in case of an error
-      }
-    })();
-   } else {
-      
-      (async () => {
-      try {
-        // Fetch data with filters
-        const response = await fetch("/api/customer/groupid", {
-          method: "POST",
-          body: JSON.stringify({
-            year,
-            group_id: groupId,
-            phone_number: phoneNumber,
-            min_total: minTotal,
-          }),
-          headers: {
-             "Content-Type": "application/json",
+        try {
+          // Fetch data with filters
+          const response = await fetch("/api/customer/count", {
+            method: "POST",
+            body: JSON.stringify({
+              year,
+              group_id: groupId,
+              phone_number: phoneNumber,
+              min_total: minTotal,
+            }),
+            headers: {
+              "Content-Type": "application/json",
             },
-         });
-         
-         const json = await response.json();
-         
-         // Check if the response is an array
-         if (Array.isArray(json)) {
-          setgroupIdData(json);
-        } else {
-          console.error("Expected an array but received:", json);
-          setgroupIdData([]); // Set to empty array if the response is not an array
-         }
-      } catch (error) {
-         console.error("Error fetching customer data:", error);
-         setgroupIdData([]); // Set to empty array in case of an error
-      }
-    })();
-   }
+          });
+
+          const json = await response.json();
+
+          // Check if the response is an array
+          if (Array.isArray(json)) {
+            setCustomersCount(json);
+          } else {
+            console.error("Expected an array but received:", json);
+            setCustomersCount([]); // Set to empty array if the response is not an array
+          }
+        } catch (error) {
+          console.error("Error fetching customer data:", error);
+          setCustomersCount([]); // Set to empty array in case of an error
+        }
+      })();
+    } else {
+      (async () => {
+        try {
+          // Fetch data with filters
+          const response = await fetch("/api/customer/groupid", {
+            method: "POST",
+            body: JSON.stringify({
+              year,
+              group_id: groupId,
+              phone_number: phoneNumber,
+              min_total: minTotal,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          const json = await response.json();
+
+          // Check if the response is an array
+          if (Array.isArray(json)) {
+            setgroupIdData(json);
+          } else {
+            console.error("Expected an array but received:", json);
+            setgroupIdData([]); // Set to empty array if the response is not an array
+          }
+        } catch (error) {
+          console.error("Error fetching customer data:", error);
+          setgroupIdData([]); // Set to empty array in case of an error
+        }
+      })();
+    }
   }, [year, groupId, phoneNumber, minTotal]); // Fetch data when filters change
 
-  // Logic for Pagination for customersCount
+  // Pagination logic for customersCount
   const indexOfLastCustomerItem = currentPage * itemsPerPage;
   const indexOfFirstCustomerItem = indexOfLastCustomerItem - itemsPerPage;
   const currentCustomerItems = customersCount.slice(
@@ -91,11 +89,22 @@ export default function Customers() {
     indexOfLastCustomerItem
   );
 
-  // Handle page change for customersCount
+  // Pagination logic for groupIdData
+  const indexOfLastGroupItem = currentPage * itemsPerPage;
+  const indexOfFirstGroupItem = indexOfLastGroupItem - itemsPerPage;
+  const currentGroupItems = groupIdData.slice(
+    indexOfFirstGroupItem,
+    indexOfLastGroupItem
+  );
+
+  // Handle page change for customersCount or groupIdData
   const paginateCustomers = (pageNumber: number) => setCurrentPage(pageNumber);
 
   // Calculate total pages for customersCount
   const totalPagesCustomers = Math.ceil(customersCount.length / itemsPerPage);
+
+  // Calculate total pages for groupIdData
+  const totalPagesGroupData = Math.ceil(groupIdData.length / itemsPerPage);
 
   return (
     <div className="p-6 w-full">
@@ -170,18 +179,21 @@ export default function Customers() {
           Previous
         </Button>
         <div className="text-sm text-gray-600">
-          Page {currentPage} of {totalPagesCustomers}
+          Page {currentPage} of{" "}
+          {groupId || phoneNumber ? totalPagesGroupData : totalPagesCustomers}
         </div>
         <Button
           className="px-4 py-2 rounded-r"
           onClick={() =>
             paginateCustomers(
-              currentPage < totalPagesCustomers
+              currentPage < (groupId || phoneNumber ? totalPagesGroupData : totalPagesCustomers)
                 ? currentPage + 1
-                : totalPagesCustomers
+                : (groupId || phoneNumber ? totalPagesGroupData : totalPagesCustomers)
             )
           }
-          disabled={currentPage === totalPagesCustomers}
+          disabled={
+            currentPage === (groupId || phoneNumber ? totalPagesGroupData : totalPagesCustomers)
+          }
         >
           Next
         </Button>
@@ -190,7 +202,7 @@ export default function Customers() {
       {groupId || phoneNumber ? (
         <SalesTable
           name="Total visits for customer groups by invoices"
-          data={groupIdData}
+          data={currentGroupItems}
         />
       ) : (
         <SalesTable
