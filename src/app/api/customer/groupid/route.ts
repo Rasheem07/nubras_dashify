@@ -9,7 +9,13 @@ export async function POST(req: NextRequest) {
   // Initialize the base query
   let query = `
     SELECT
-      *
+      TO_CHAR(sale_date, 'YYYY-MM-DD')  AS "Sale date",
+      order_number as "Order Number",
+      customer_name as "Customer Name",
+      phone_number as "Phone Number",
+      total_amount as "Total amount",
+      balance_amount as "Balance amount",
+      sales_person as "Sales person"
     FROM 
       "Nubras updated database"
   `;
@@ -47,7 +53,7 @@ export async function POST(req: NextRequest) {
   // Add ORDER BY clause
   query += `
     ORDER BY 
-      total_amount;
+      sale_date DESC;
   `;
 
   console.log(query)

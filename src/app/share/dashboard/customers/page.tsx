@@ -2,6 +2,7 @@
 "use client";
 import SalesTable from "@/app/dashboards/_components/salesTable";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import React, { useEffect, useState } from "react";
 
@@ -186,13 +187,19 @@ export default function Customers() {
           className="px-4 py-2 rounded-r"
           onClick={() =>
             paginateCustomers(
-              currentPage < (groupId || phoneNumber ? totalPagesGroupData : totalPagesCustomers)
+              currentPage <
+                (groupId || phoneNumber
+                  ? totalPagesGroupData
+                  : totalPagesCustomers)
                 ? currentPage + 1
-                : (groupId || phoneNumber ? totalPagesGroupData : totalPagesCustomers)
+                : groupId || phoneNumber
+                ? totalPagesGroupData
+                : totalPagesCustomers
             )
           }
           disabled={
-            currentPage === (groupId || phoneNumber ? totalPagesGroupData : totalPagesCustomers)
+            currentPage ===
+            (groupId || phoneNumber ? totalPagesGroupData : totalPagesCustomers)
           }
         >
           Next
@@ -200,10 +207,24 @@ export default function Customers() {
       </div>
 
       {groupId || phoneNumber ? (
-        <SalesTable
-          name="Total visits for customer groups by invoices"
-          data={currentGroupItems}
-        />
+       <Card>
+       <CardContent>
+         {/* Display sum of total_amount and length of currentGroupItems */}
+         <div className="my-4">
+           <p><strong>Total Visits: </strong>{groupIdData.length}</p>
+           <p><strong>Total Amount: </strong>
+             {groupIdData.reduce((acc, item) => acc + parseFloat(item["Total amount"] || "0"), 0).toFixed(2)}
+           </p>
+         </div>
+     
+         {/* Render SalesTable */}
+         <SalesTable
+           name="Total visits for customer groups by invoices"
+           data={currentGroupItems}
+         />
+       </CardContent>
+     </Card>
+     
       ) : (
         <SalesTable
           name="Total visits for customer groups"
