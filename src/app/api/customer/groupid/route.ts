@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
   const pg = await client.connect();
-  const { year, group_id, phone_number, min_total } = await req.json();
+  const { year, group_id, phone_number, min_total, customer_name} = await req.json();
 
   // Initialize the base query
   let query = `
@@ -39,6 +39,12 @@ export async function POST(req: NextRequest) {
     params.push(phone_number);
   }
 
+  if (customer_name && customer_name !== "") {
+    conditions.push(`customer_name = $${params.length + 1}`);
+    params.push(customer_name);
+  }
+
+
   // Add WHERE clause if any condition exists
   if (conditions.length > 0) {
     query += ` WHERE ${conditions.join(" AND ")}`;
@@ -53,7 +59,7 @@ export async function POST(req: NextRequest) {
   // Add ORDER BY clause
   query += `
     ORDER BY 
-      sale_date DESC;
+         total_amount DESC;;
   `;
 
   console.log(query)

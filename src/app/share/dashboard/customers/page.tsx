@@ -15,7 +15,7 @@ export default function Customers() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [minTotal, setMinTotal] = useState("");
   const [groupIdData, setgroupIdData] = useState<any[]>([]);
-
+  const [customer_name, setcustomer_name] = useState('')
   useEffect(() => {
     if (groupId === "" && phoneNumber === "") {
       (async () => {
@@ -28,6 +28,7 @@ export default function Customers() {
               group_id: groupId,
               phone_number: phoneNumber,
               min_total: minTotal,
+              customer_name
             }),
             headers: {
               "Content-Type": "application/json",
@@ -59,6 +60,7 @@ export default function Customers() {
               group_id: groupId,
               phone_number: phoneNumber,
               min_total: minTotal,
+              customer_name
             }),
             headers: {
               "Content-Type": "application/json",
@@ -80,7 +82,7 @@ export default function Customers() {
         }
       })();
     }
-  }, [year, groupId, phoneNumber, minTotal]); // Fetch data when filters change
+  }, [year, groupId, phoneNumber, minTotal,customer_name]); // Fetch data when filters change
 
   // Pagination logic for customersCount
   const indexOfLastCustomerItem = currentPage * itemsPerPage;
@@ -144,6 +146,14 @@ export default function Customers() {
             setPhoneNumber(e.target.value)
           }
           placeholder="Phone Number"
+          className="w-40"
+        />
+        <Input
+          value={customer_name}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setcustomer_name(e.target.value)
+          }
+          placeholder="Customer name"
           className="w-40"
         />
         <Input
