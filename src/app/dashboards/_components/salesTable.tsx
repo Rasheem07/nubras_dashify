@@ -52,7 +52,7 @@ const Table = ({ data }: { data: DataRow[] }) => {
                 <th
                   {...column.getHeaderProps()}
                   key={Math.random()}
-                  className="text-xs font-medium py-2 px-1 bg-gray-200 text-center border border-gray-300"
+                  className="text-sm lg:text-base xl:text-lg 2xl:text-xl font-medium py-3 px-2 lg:px-3 bg-gray-200 text-center border border-gray-300"
                   style={{
                     width: `${100 / columns.length}%`, // Distribute column widths equally
                     whiteSpace: "nowrap", // Prevent wrapping
@@ -79,7 +79,7 @@ const Table = ({ data }: { data: DataRow[] }) => {
                   <td
                     {...cell.getCellProps()}
                     key={Math.random()}
-                    className={`text-xs py-1.5 px-1 text-center border border-gray-200 ${
+                    className={`text-sm lg:text-base xl:text-lg 2xl:text-xl py-3 px-2 lg:px-3 text-center border border-gray-200 ${
                       getCellStyle(cell.value as string) // Apply the dynamic style here
                     }`}
                     style={{
@@ -112,12 +112,11 @@ const SalesTable = ({ data, className, name="Sales Data Table", description="Sal
 
   return (
     <div className={cn("", className)}>
-      <Card className="shadow-sm border border-gray-200  rounded-lg overflow-hidden">
+      <Card className="shadow-sm border border-gray-200 rounded-lg overflow-hidden">
         <CardHeader className="p-4 flex flex-row justify-between items-center">
           <div>
-
-          <CardTitle  className="max-w-max font-bold text-teal-700">{name}</CardTitle>
-          <CardDescription >{description}</CardDescription>
+            <CardTitle className="max-w-max font-bold text-teal-700">{name}</CardTitle>
+            <CardDescription>{description}</CardDescription>
           </div>
           <Button
             onClick={exportToExcel}
